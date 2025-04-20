@@ -18,8 +18,10 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 tauri-build = { version = "2.2.0", features = [] }
 
 [dependencies]
-serde_json = "1.0"
-serde = { version = "1.0", features = ["derive"] }
-log = "0.4"
-tauri = { version = "2.5.0", features = [] }
-tauri-plugin-log = "2.0.0-rc"
+serde_json = "1.0"  # JSON数据的序列化和反序列化库
+serde = { version = "1.0", features = ["derive"] }  # 通用数据序列化/反序列化框架，derive特性允许自动实现序列化特性
+log = "0.4"  # 轻量级日志记录API，提供统一的日志接口
+tauri = { version = "2.5.0", features = [] }  # 构建跨平台桌面应用的核心框架
+tauri-plugin-log = "2.0.0-rc"  # Tauri的日志插件，为应用提供日志功能
+reqwest = { version = "0.11", features = ["json"] }  # HTTP客户端库，支持异步请求和JSON处理
+anyhow = "1.0"  # 简化错误处理的库，提供统一的错误类型
