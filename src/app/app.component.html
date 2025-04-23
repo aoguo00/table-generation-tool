@@ -58,11 +58,11 @@
             [class.selected]="selectedProject === item"
             (click)="selectProject(item)">
           <td class="num-column">{{i + 1}}</td>
-          <td>{{item._widget_1635777114903}}</td>
-          <td>{{item._widget_1635777114991}}</td>
-          <td>{{item._widget_1635777114935}}</td>
-          <td>{{item._widget_1636359817201}}</td>
-          <td>{{item._widget_1635777114972}}</td>
+          <td>{{item.project_name}}</td>
+          <td>{{item.station_name}}</td>
+          <td>{{item.project_number}}</td>
+          <td>{{item.design_number}}</td>
+          <td>{{item.customer_name}}</td>
         </tr>
       </tbody>
     </table>
@@ -70,10 +70,12 @@
 
   <!-- 设备清单 -->
   <div class="equipment-list-section" *ngIf="selectedProject">
-    <h3>设备清单 - {{selectedProject._widget_1635777114991}}</h3>
+    <h3>设备清单 - {{selectedProject.station_name}}</h3>
+    
     <table class="equipment-table">
       <thead>
         <tr>
+          <th>序号</th>
           <th>设备名称</th>
           <th>品牌</th>
           <th>规格型号</th>
@@ -85,13 +87,14 @@
       </thead>
       <tbody>
         <tr *ngFor="let item of equipmentData; let i = index">
+          <td>{{i + 1}}</td>
           <td>{{item.name}}</td>
           <td>{{item.brand}}</td>
           <td>{{item.model}}</td>
-          <td>{{item.techParam}}</td>
+          <td>{{item.tech_param}}</td>
           <td>{{item.quantity}}</td>
           <td>{{item.unit}}</td>
-          <td>{{item.externalParam}}</td>
+          <td>{{item.external_param}}</td>
         </tr>
         <tr *ngIf="equipmentData.length === 0 && !isLoading">
           <td colspan="7" class="no-data">暂无设备数据</td>

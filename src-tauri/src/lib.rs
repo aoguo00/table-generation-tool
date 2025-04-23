@@ -1,13 +1,21 @@
 mod application_services;
 mod commands;
+mod model_domain;
 use commands::*;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
   tauri::Builder::default()
+    .plugin(tauri_plugin_dialog::init())
+    .plugin(tauri_plugin_fs::init())
+    .plugin(tauri_plugin_shell::init())
+    .plugin(tauri_plugin_os::init())
+    .plugin(tauri_plugin_process::init())
     .invoke_handler(tauri::generate_handler![
       query_jdy_data_by_project_number,
-      query_equipment_by_station
+      query_equipment_by_station,
+      process_station_data,
+      generate_io_point_table
     ])
     .setup(|app| {
       if cfg!(debug_assertions) {
