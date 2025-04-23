@@ -515,172 +515,11 @@ impl IOExcelService {
             
             // 设置Excel公式
             if data_type == "REAL" {
-                // 设置SLL设定点位: 使用IF公式检查HMI变量是否为空
-                if let Some(pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "SLL设定点位") {
-                    let formula = format!("=IF(ISBLANK(I{}),\"_LoLoLimit\",I{}&\"_LoLoLimit\")", row, row);
-                    worksheet.get_cell_mut((pos as u32 + 1, row)).set_formula(formula);
-                }
-                
-                // 设置SL设定点位: 使用IF公式检查HMI变量是否为空
-                if let Some(pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "SL设定点位") {
-                    let formula = format!("=IF(ISBLANK(I{}),\"_LoLimit\",I{}&\"_LoLimit\")", row, row);
-                    worksheet.get_cell_mut((pos as u32 + 1, row)).set_formula(formula);
-                }
-                
-                // 设置SH设定点位: 使用IF公式检查HMI变量是否为空
-                if let Some(pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "SH设定点位") {
-                    let formula = format!("=IF(ISBLANK(I{}),\"_HiLimit\",I{}&\"_HiLimit\")", row, row);
-                    worksheet.get_cell_mut((pos as u32 + 1, row)).set_formula(formula);
-                }
-                
-                // 设置SHH设定点位: 使用IF公式检查HMI变量是否为空
-                if let Some(pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "SHH设定点位") {
-                    let formula = format!("=IF(ISBLANK(I{}),\"_HiHiLimit\",I{}&\"_HiHiLimit\")", row, row);
-                    worksheet.get_cell_mut((pos as u32 + 1, row)).set_formula(formula);
-                }
-                
-                // 设置LL报警: 使用IF公式检查HMI变量是否为空
-                if let Some(pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "LL报警") {
-                    let formula = format!("=IF(ISBLANK(I{}),\"_LL\",I{}&\"_LL\")", row, row);
-                    worksheet.get_cell_mut((pos as u32 + 1, row)).set_formula(formula);
-                }
-                
-                // 设置L报警: 使用IF公式检查HMI变量是否为空
-                if let Some(pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "L报警") {
-                    let formula = format!("=IF(ISBLANK(I{}),\"_L\",I{}&\"_L\")", row, row);
-                    worksheet.get_cell_mut((pos as u32 + 1, row)).set_formula(formula);
-                }
-                
-                // 设置H报警: 使用IF公式检查HMI变量是否为空
-                if let Some(pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "H报警") {
-                    let formula = format!("=IF(ISBLANK(I{}),\"_H\",I{}&\"_H\")", row, row);
-                    worksheet.get_cell_mut((pos as u32 + 1, row)).set_formula(formula);
-                }
-                
-                // 设置HH报警: 使用IF公式检查HMI变量是否为空
-                if let Some(pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "HH报警") {
-                    let formula = format!("=IF(ISBLANK(I{}),\"_HH\",I{}&\"_HH\")", row, row);
-                    worksheet.get_cell_mut((pos as u32 + 1, row)).set_formula(formula);
-                }
-                
-                // 设置维护值设定点位: 使用IF公式检查HMI变量是否为空
-                if let Some(pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "维护值设定点位") {
-                    let formula = format!("=IF(ISBLANK(I{}),\"_whz\",I{}&\"_whz\")", row, row);
-                    worksheet.get_cell_mut((pos as u32 + 1, row)).set_formula(formula);
-                }
-                
-                // 设置维护使能开关点位: 使用IF公式检查HMI变量是否为空
-                if let Some(pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "维护使能开关点位") {
-                    let formula = format!("=IF(ISBLANK(I{}),\"_whzzt\",I{}&\"_whzzt\")", row, row);
-                    worksheet.get_cell_mut((pos as u32 + 1, row)).set_formula(formula);
-                }
+                // 为REAL类型设置公式
+                Self::set_formulas_for_real_type(worksheet, row);
             } else {
                 // 对于BOOL类型，将所有设定点位和报警点位设置为"/"
-                if let Some(pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "SLL设定点位") {
-                    worksheet.get_cell_mut((pos as u32 + 1, row)).set_value("/".to_string());
-                }
-                if let Some(pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "SL设定点位") {
-                    worksheet.get_cell_mut((pos as u32 + 1, row)).set_value("/".to_string());
-                }
-                if let Some(pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "SH设定点位") {
-                    worksheet.get_cell_mut((pos as u32 + 1, row)).set_value("/".to_string());
-                }
-                
-                if let Some(pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "SHH设定点位") {
-                    worksheet.get_cell_mut((pos as u32 + 1, row)).set_value("/".to_string());
-                }
-                if let Some(pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "LL报警") {
-                    worksheet.get_cell_mut((pos as u32 + 1, row)).set_value("/".to_string());
-                }
-                
-                if let Some(pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "L报警") {
-                    worksheet.get_cell_mut((pos as u32 + 1, row)).set_value("/".to_string());
-                }
-                
-                if let Some(pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "H报警") {
-                    worksheet.get_cell_mut((pos as u32 + 1, row)).set_value("/".to_string());
-                }
-                if let Some(pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "HH报警") {
-                    worksheet.get_cell_mut((pos as u32 + 1, row)).set_value("/".to_string());
-                }
-                if let Some(pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "维护值设定点位") {
-                    worksheet.get_cell_mut((pos as u32 + 1, row)).set_value("/".to_string());
-                }
-                
-                if let Some(pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "维护使能开关点位") {
-                    worksheet.get_cell_mut((pos as u32 + 1, row)).set_value("/".to_string());
-                }
-                if let Some(pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "维护值设定") {
-                    worksheet.get_cell_mut((pos as u32 + 1, row)).set_value("/".to_string());
-                }
-                
-                // 也将所有相关的PLC地址和通信地址设置为"/"
-                if let Some(pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "SLL设定点位_PLC地址") {
-                    worksheet.get_cell_mut((pos as u32 + 1, row)).set_value("/".to_string());
-                }
-                if let Some(pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "SLL设定点位_通讯地址") {
-                    worksheet.get_cell_mut((pos as u32 + 1, row)).set_value("/".to_string());
-                }
-                if let Some(pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "SL设定点位_PLC地址") {
-                    worksheet.get_cell_mut((pos as u32 + 1, row)).set_value("/".to_string());
-                }
-                
-                if let Some(pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "SL设定点位_通讯地址") {
-                    worksheet.get_cell_mut((pos as u32 + 1, row)).set_value("/".to_string());
-                }
-                if let Some(pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "SH设定点位_PLC地址") {
-                    worksheet.get_cell_mut((pos as u32 + 1, row)).set_value("/".to_string());
-                }
-                if let Some(pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "SH设定点位_通讯地址") {
-                    worksheet.get_cell_mut((pos as u32 + 1, row)).set_value("/".to_string());
-                }
-                
-                if let Some(pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "SHH设定点位_PLC地址") {
-                    worksheet.get_cell_mut((pos as u32 + 1, row)).set_value("/".to_string());
-                }
-                if let Some(pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "SHH设定点位_通讯地址") {
-                    worksheet.get_cell_mut((pos as u32 + 1, row)).set_value("/".to_string());
-                }
-                if let Some(pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "LL报警_PLC地址") {
-                    worksheet.get_cell_mut((pos as u32 + 1, row)).set_value("/".to_string());
-                }
-                
-                if let Some(pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "LL报警_通讯地址") {
-                    worksheet.get_cell_mut((pos as u32 + 1, row)).set_value("/".to_string());
-                }
-                if let Some(pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "L报警_PLC地址") {
-                    worksheet.get_cell_mut((pos as u32 + 1, row)).set_value("/".to_string());
-                }
-                if let Some(pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "L报警_通讯地址") {
-                    worksheet.get_cell_mut((pos as u32 + 1, row)).set_value("/".to_string());
-                }
-                
-                if let Some(pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "H报警_PLC地址") {
-                    worksheet.get_cell_mut((pos as u32 + 1, row)).set_value("/".to_string());
-                }
-                if let Some(pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "H报警_通讯地址") {
-                    worksheet.get_cell_mut((pos as u32 + 1, row)).set_value("/".to_string());
-                }
-                if let Some(pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "HH报警_PLC地址") {
-                    worksheet.get_cell_mut((pos as u32 + 1, row)).set_value("/".to_string());
-                }
-                
-                if let Some(pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "HH报警_通讯地址") {
-                    worksheet.get_cell_mut((pos as u32 + 1, row)).set_value("/".to_string());
-                }
-                if let Some(pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "维护值设定点位_PLC地址") {
-                    worksheet.get_cell_mut((pos as u32 + 1, row)).set_value("/".to_string());
-                }
-                if let Some(pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "维护值设定点位_通讯地址") {
-                    worksheet.get_cell_mut((pos as u32 + 1, row)).set_value("/".to_string());
-                }
-                
-                if let Some(pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "维护使能开关点位_PLC地址") {
-                    worksheet.get_cell_mut((pos as u32 + 1, row)).set_value("/".to_string());
-                }
-                if let Some(pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "维护使能开关点位_通讯地址") {
-                    worksheet.get_cell_mut((pos as u32 + 1, row)).set_value("/".to_string());
-                }
+                Self::set_placeholders_for_bool_type(worksheet, row);
             }
             
             // 设置维护值设定为"/"
@@ -688,152 +527,121 @@ impl IOExcelService {
                 worksheet.get_cell_mut((maint_val_pos as u32 + 1, row)).set_value("/".to_string());
             }
             
-            // 为SLL设定点位添加PLC地址和通信地址
-            if let Some(sll_addr_pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "SLL设定点位_PLC地址") {
-                let extra_plc_addr = format!("%MD{}", real_address_counter);
-                worksheet.get_cell_mut((sll_addr_pos as u32 + 1, row)).set_value(extra_plc_addr.clone());
+            // 为各个点位添加PLC地址和通信地址
+            Self::add_addresses_for_setpoints(worksheet, row, &mut real_address_counter, &mut bool_address_counter);
+        }
+        
+        // 调整列宽 - 自动适应内容
+        Self::adjust_column_widths(worksheet, &io_table);
+        
+        // 保存Excel
+        write(&spreadsheet, output_path)?;
+        
+        Ok(())
+    }
+    
+    /// 为REAL类型设置公式
+    fn set_formulas_for_real_type(worksheet: &mut Worksheet, row: u32) {
+        // 点位配置，格式为 (列名, 后缀)
+        let point_configs = [
+            ("SLL设定点位", "_LoLoLimit"),
+            ("SL设定点位", "_LoLimit"),
+            ("SH设定点位", "_HiLimit"),
+            ("SHH设定点位", "_HiHiLimit"),
+            ("LL报警", "_LL"),
+            ("L报警", "_L"),
+            ("H报警", "_H"),
+            ("HH报警", "_HH"),
+            ("维护值设定点位", "_whz"),
+            ("维护使能开关点位", "_whzzt"),
+        ];
+        
+        // HMI变量所在的列索引是I列
+        for (column_name, suffix) in &point_configs {
+            if let Some(pos) = IO_TABLE_HEADERS.iter().position(|&h| h == *column_name) {
+                let formula = format!("=IF(ISBLANK(I{}),\"{}\",I{}&\"{}\")", row, suffix, row, suffix);
+                worksheet.get_cell_mut((pos as u32 + 1, row)).set_formula(formula);
+            }
+        }
+    }
+    
+    /// 为BOOL类型设置占位符
+    fn set_placeholders_for_bool_type(worksheet: &mut Worksheet, row: u32) {
+        // 需要设置"/"的列
+        let placeholder_columns = [
+            "SLL设定点位", "SL设定点位", "SH设定点位", "SHH设定点位",
+            "LL报警", "L报警", "H报警", "HH报警",
+            "维护值设定点位", "维护使能开关点位", "维护值设定",
+            // PLC地址和通信地址
+            "SLL设定点位_PLC地址", "SLL设定点位_通讯地址",
+            "SL设定点位_PLC地址", "SL设定点位_通讯地址",
+            "SH设定点位_PLC地址", "SH设定点位_通讯地址",
+            "SHH设定点位_PLC地址", "SHH设定点位_通讯地址",
+            "LL报警_PLC地址", "LL报警_通讯地址",
+            "L报警_PLC地址", "L报警_通讯地址",
+            "H报警_PLC地址", "H报警_通讯地址",
+            "HH报警_PLC地址", "HH报警_通讯地址",
+            "维护值设定点位_PLC地址", "维护值设定点位_通讯地址",
+            "维护使能开关点位_PLC地址", "维护使能开关点位_通讯地址",
+        ];
+        
+        for column_name in &placeholder_columns {
+            if let Some(pos) = IO_TABLE_HEADERS.iter().position(|&h| h == *column_name) {
+                worksheet.get_cell_mut((pos as u32 + 1, row)).set_value("/".to_string());
+            }
+        }
+    }
+    
+    /// 为各个点位添加PLC地址和通信地址
+    fn add_addresses_for_setpoints(
+        worksheet: &mut Worksheet, 
+        row: u32, 
+        real_address_counter: &mut u32, 
+        bool_address_counter: &mut (u32, u32)
+    ) {
+        // REAL类型地址的点位配置
+        let real_address_configs = [
+            ("SLL设定点位_PLC地址", "SLL设定点位_通讯地址"),
+            ("SL设定点位_PLC地址", "SL设定点位_通讯地址"),
+            ("SH设定点位_PLC地址", "SH设定点位_通讯地址"),
+            ("SHH设定点位_PLC地址", "SHH设定点位_通讯地址"),
+            ("维护值设定点位_PLC地址", "维护值设定点位_通讯地址"),
+        ];
+        
+        // 为REAL类型地址点位添加PLC地址和通信地址
+        for (plc_addr_col, comm_addr_col) in &real_address_configs {
+            if let Some(addr_pos) = IO_TABLE_HEADERS.iter().position(|&h| h == *plc_addr_col) {
+                let extra_plc_addr = format!("%MD{}", *real_address_counter);
+                worksheet.get_cell_mut((addr_pos as u32 + 1, row)).set_value(extra_plc_addr.clone());
                 
                 // 计算并设置通信地址
                 let extra_comm_addr = Self::calculate_modbus_address(&extra_plc_addr, "REAL");
-                if let Some(sll_comm_pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "SLL设定点位_通讯地址") {
-                    worksheet.get_cell_mut((sll_comm_pos as u32 + 1, row)).set_value(extra_comm_addr.to_string());
+                if let Some(comm_pos) = IO_TABLE_HEADERS.iter().position(|&h| h == *comm_addr_col) {
+                    worksheet.get_cell_mut((comm_pos as u32 + 1, row)).set_value(extra_comm_addr.to_string());
                 }
-                real_address_counter += 4;
+                *real_address_counter += 4;
             }
-            
-            // 为SL设定点位添加PLC地址和通信地址
-            if let Some(sl_addr_pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "SL设定点位_PLC地址") {
-                let extra_plc_addr = format!("%MD{}", real_address_counter);
-                worksheet.get_cell_mut((sl_addr_pos as u32 + 1, row)).set_value(extra_plc_addr.clone());
-                
-                // 计算并设置通信地址
-                let extra_comm_addr = Self::calculate_modbus_address(&extra_plc_addr, "REAL");
-                if let Some(sl_comm_pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "SL设定点位_通讯地址") {
-                    worksheet.get_cell_mut((sl_comm_pos as u32 + 1, row)).set_value(extra_comm_addr.to_string());
-                }
-                real_address_counter += 4;
-            }
-            
-            // 为SH设定点位添加PLC地址和通信地址
-            if let Some(sh_addr_pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "SH设定点位_PLC地址") {
-                let extra_plc_addr = format!("%MD{}", real_address_counter);
-                worksheet.get_cell_mut((sh_addr_pos as u32 + 1, row)).set_value(extra_plc_addr.clone());
-                
-                // 计算并设置通信地址
-                let extra_comm_addr = Self::calculate_modbus_address(&extra_plc_addr, "REAL");
-                if let Some(sh_comm_pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "SH设定点位_通讯地址") {
-                    worksheet.get_cell_mut((sh_comm_pos as u32 + 1, row)).set_value(extra_comm_addr.to_string());
-                }
-                real_address_counter += 4;
-            }
-            
-            // 为SHH设定点位添加PLC地址和通信地址
-            if let Some(shh_addr_pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "SHH设定点位_PLC地址") {
-                let extra_plc_addr = format!("%MD{}", real_address_counter);
-                worksheet.get_cell_mut((shh_addr_pos as u32 + 1, row)).set_value(extra_plc_addr.clone());
-                
-                // 计算并设置通信地址
-                let extra_comm_addr = Self::calculate_modbus_address(&extra_plc_addr, "REAL");
-                if let Some(shh_comm_pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "SHH设定点位_通讯地址") {
-                    worksheet.get_cell_mut((shh_comm_pos as u32 + 1, row)).set_value(extra_comm_addr.to_string());
-                }
-                real_address_counter += 4;
-            }
-            
-            // 为LL报警添加PLC地址和通信地址 (BOOL类型)
-            if let Some(ll_addr_pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "LL报警_PLC地址") {
+        }
+        
+        // BOOL类型地址的点位配置
+        let bool_address_configs = [
+            ("LL报警_PLC地址", "LL报警_通讯地址"),
+            ("L报警_PLC地址", "L报警_通讯地址"),
+            ("H报警_PLC地址", "H报警_通讯地址"),
+            ("HH报警_PLC地址", "HH报警_通讯地址"),
+            ("维护使能开关点位_PLC地址", "维护使能开关点位_通讯地址"),
+        ];
+        
+        // 为BOOL类型地址点位添加PLC地址和通信地址
+        for (plc_addr_col, comm_addr_col) in &bool_address_configs {
+            if let Some(addr_pos) = IO_TABLE_HEADERS.iter().position(|&h| h == *plc_addr_col) {
                 let extra_plc_addr = format!("%MX{}.{}", bool_address_counter.0, bool_address_counter.1);
-                worksheet.get_cell_mut((ll_addr_pos as u32 + 1, row)).set_value(extra_plc_addr.clone());
+                worksheet.get_cell_mut((addr_pos as u32 + 1, row)).set_value(extra_plc_addr.clone());
                 
                 // 计算并设置通信地址
                 let extra_comm_addr = Self::calculate_modbus_address(&extra_plc_addr, "BOOL");
-                if let Some(ll_comm_pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "LL报警_通讯地址") {
-                    worksheet.get_cell_mut((ll_comm_pos as u32 + 1, row)).set_value(extra_comm_addr.to_string());
-                }
-                // 更新BOOL地址计数器
-                bool_address_counter.1 += 1;
-                if bool_address_counter.1 > 7 {
-                    bool_address_counter.0 += 1;
-                    bool_address_counter.1 = 0;
-                }
-            }
-            
-            // 为L报警添加PLC地址和通信地址 (BOOL类型)
-            if let Some(l_addr_pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "L报警_PLC地址") {
-                let extra_plc_addr = format!("%MX{}.{}", bool_address_counter.0, bool_address_counter.1);
-                worksheet.get_cell_mut((l_addr_pos as u32 + 1, row)).set_value(extra_plc_addr.clone());
-                
-                // 计算并设置通信地址
-                let extra_comm_addr = Self::calculate_modbus_address(&extra_plc_addr, "BOOL");
-                if let Some(l_comm_pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "L报警_通讯地址") {
-                    worksheet.get_cell_mut((l_comm_pos as u32 + 1, row)).set_value(extra_comm_addr.to_string());
-                }
-                // 更新BOOL地址计数器
-                bool_address_counter.1 += 1;
-                if bool_address_counter.1 > 7 {
-                    bool_address_counter.0 += 1;
-                    bool_address_counter.1 = 0;
-                }
-            }
-            
-            // 为H报警添加PLC地址和通信地址 (BOOL类型)
-            if let Some(h_addr_pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "H报警_PLC地址") {
-                let extra_plc_addr = format!("%MX{}.{}", bool_address_counter.0, bool_address_counter.1);
-                worksheet.get_cell_mut((h_addr_pos as u32 + 1, row)).set_value(extra_plc_addr.clone());
-                
-                // 计算并设置通信地址
-                let extra_comm_addr = Self::calculate_modbus_address(&extra_plc_addr, "BOOL");
-                if let Some(h_comm_pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "H报警_通讯地址") {
-                    worksheet.get_cell_mut((h_comm_pos as u32 + 1, row)).set_value(extra_comm_addr.to_string());
-                }
-                // 更新BOOL地址计数器
-                bool_address_counter.1 += 1;
-                if bool_address_counter.1 > 7 {
-                    bool_address_counter.0 += 1;
-                    bool_address_counter.1 = 0;
-                }
-            }
-            
-            // 为HH报警添加PLC地址和通信地址 (BOOL类型)
-            if let Some(hh_addr_pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "HH报警_PLC地址") {
-                let extra_plc_addr = format!("%MX{}.{}", bool_address_counter.0, bool_address_counter.1);
-                worksheet.get_cell_mut((hh_addr_pos as u32 + 1, row)).set_value(extra_plc_addr.clone());
-                
-                // 计算并设置通信地址
-                let extra_comm_addr = Self::calculate_modbus_address(&extra_plc_addr, "BOOL");
-                if let Some(hh_comm_pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "HH报警_通讯地址") {
-                    worksheet.get_cell_mut((hh_comm_pos as u32 + 1, row)).set_value(extra_comm_addr.to_string());
-                }
-                // 更新BOOL地址计数器
-                bool_address_counter.1 += 1;
-                if bool_address_counter.1 > 7 {
-                    bool_address_counter.0 += 1;
-                    bool_address_counter.1 = 0;
-                }
-            }
-            
-            // 为维护值设定点位添加PLC地址和通信地址 (REAL类型)
-            if let Some(maint_addr_pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "维护值设定点位_PLC地址") {
-                let extra_plc_addr = format!("%MD{}", real_address_counter);
-                worksheet.get_cell_mut((maint_addr_pos as u32 + 1, row)).set_value(extra_plc_addr.clone());
-                
-                // 计算并设置通信地址
-                let extra_comm_addr = Self::calculate_modbus_address(&extra_plc_addr, "REAL");
-                if let Some(maint_comm_pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "维护值设定点位_通讯地址") {
-                    worksheet.get_cell_mut((maint_comm_pos as u32 + 1, row)).set_value(extra_comm_addr.to_string());
-                }
-                real_address_counter += 4;
-            }
-            
-            // 为维护使能开关点位添加PLC地址和通信地址 (BOOL类型)
-            if let Some(maint_en_addr_pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "维护使能开关点位_PLC地址") {
-                let extra_plc_addr = format!("%MX{}.{}", bool_address_counter.0, bool_address_counter.1);
-                worksheet.get_cell_mut((maint_en_addr_pos as u32 + 1, row)).set_value(extra_plc_addr.clone());
-                
-                // 计算并设置通信地址
-                let extra_comm_addr = Self::calculate_modbus_address(&extra_plc_addr, "BOOL");
-                if let Some(maint_en_comm_pos) = IO_TABLE_HEADERS.iter().position(|&h| h == "维护使能开关点位_通讯地址") {
-                    worksheet.get_cell_mut((maint_en_comm_pos as u32 + 1, row)).set_value(extra_comm_addr.to_string());
+                if let Some(comm_pos) = IO_TABLE_HEADERS.iter().position(|&h| h == *comm_addr_col) {
+                    worksheet.get_cell_mut((comm_pos as u32 + 1, row)).set_value(extra_comm_addr.to_string());
                 }
                 // 更新BOOL地址计数器
                 bool_address_counter.1 += 1;
@@ -843,8 +651,10 @@ impl IOExcelService {
                 }
             }
         }
-        
-        // 调整列宽 - 自动适应内容
+    }
+    
+    /// 自动调整列宽
+    fn adjust_column_widths(worksheet: &mut Worksheet, io_table: &IOTable) {
         let mut column_widths = vec![15.0f64; IO_TABLE_HEADERS.len()]; // 默认宽度为15.0，明确指定f64类型
         
         // 先计算表头宽度
@@ -903,11 +713,6 @@ impl IOExcelService {
             let width = f64::min(column_widths[col_idx], 50.0);
             worksheet.get_column_dimension_mut(&col_letter).set_width(width);
         }
-        
-        // 保存Excel
-        write(&spreadsheet, output_path)?;
-        
-        Ok(())
     }
 
     /// 向数据处理服务发送场站设备数据
