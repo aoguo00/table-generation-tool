@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { invoke } from '@tauri-apps/api/core';
-import { getCurrent } from '@tauri-apps/api/window';
+import { getCurrentWindow } from '@tauri-apps/api/window';
 
 // 项目信息接口
 interface ProjectInfo {
@@ -118,7 +118,7 @@ export class AppComponent {
       }));
 
       // 获取当前窗口
-      const currentWindow = getCurrent();
+      const currentWindow = await getCurrentWindow();
       
       // 调用后端生成IO点表
       const filePath: string = await invoke('generate_io_point_table', {
