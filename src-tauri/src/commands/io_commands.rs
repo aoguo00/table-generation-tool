@@ -6,6 +6,7 @@ use tauri_plugin_dialog::DialogExt;
 use std::path::Path;
 use defer;
 use crate::application_services::excel_services::io_excel_services::{IOExcelService, convert_equipment_items};
+use std::process::Command;
 
 #[command]
 pub async fn process_station_data(
@@ -95,4 +96,33 @@ pub async fn generate_io_point_table(
         },
         None => Err("用户取消了保存操作".to_string())
     }
+}
+
+#[command]
+pub async fn open_file(path: String) -> Result<(), String> {
+    #[cfg(target_os = "windows")]
+    {
+        Command::new("cmd")
+            .args(["/C", "start", "", &path])
+            .spawn()
+            .map_err(|e| format!("打开文件失败: {}", e))?;
+    }
+
+    #[cfg(target_os = "macos")]
+    {
+        Command::new("open")
+            .arg(&path)
+            .spawn()
+            .map_err(|e| format!("打开文件失败: {}", e))?;
+    }
+
+    #[cfg(target_os = "linux")]
+    {
+        Command::new("xdg-open")
+            .arg(&path)
+            .spawn()
+            .map_err(|e| format!("打开文件失败: {}", e))?;
+    }
+
+    Ok(())
 } 

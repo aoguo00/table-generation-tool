@@ -15,7 +15,8 @@ pub fn run() {
       query_jdy_data_by_project_number,//查询JDY数据
       query_equipment_by_station,//查询设备数据
       process_station_data,//处理场站数据
-      generate_io_point_table//生成IO点表
+      generate_io_point_table,//生成IO点表
+      open_file//打开文件
     ])
     .setup(|app| {
       if cfg!(debug_assertions) {
