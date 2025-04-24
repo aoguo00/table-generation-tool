@@ -11,18 +11,22 @@
       <div class="form-row">
         <div class="form-group">
           <label>项目编号:</label>
-          <input #projectInput placeholder="输入项目编号" value="OPP.23110200272">
+          <div class="search-wrapper">
+            <input type="text" nz-input #projectInput placeholder="输入项目编号" value="OPP.23110200272">
+            <button nz-button nzType="primary" (click)="queryProject(projectInput.value)">
+              <span nz-icon nzType="search"></span>
+            </button>
+          </div>
         </div>
         <div class="form-group">
           <label>场站编号:</label>
-          <input placeholder="输入场站编号">
+          <div class="search-wrapper">
+            <input type="text" nz-input placeholder="输入场站编号">
+          </div>
         </div>
       </div>
 
       <div class="button-group">
-        <button class="btn btn-query" (click)="queryProject(projectInput.value)" [disabled]="isLoading">
-          {{ isLoading ? '查询中...' : '查询' }}
-        </button>
         <button class="btn btn-clear" (click)="clearForm()" [disabled]="isLoading">清空</button>
         <button class="btn btn-generate" (click)="generatePointTable()" [disabled]="isLoading">生成点表</button>
         <button class="btn btn-upload" (click)="uploadPointTable('普通')" [disabled]="true">上传点表</button>
@@ -103,3 +107,4 @@
     </table>
   </div>
 </div>
+

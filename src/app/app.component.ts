@@ -2,6 +2,12 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { invoke } from '@tauri-apps/api/core';
 import { getCurrentWindow } from '@tauri-apps/api/window';
+import { NzInputModule } from 'ng-zorro-antd/input';
+import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NzButtonModule } from 'ng-zorro-antd/button';
+import { FormsModule } from '@angular/forms';
+import { SearchOutline } from '@ant-design/icons-angular/icons';
+import { NzIconService } from 'ng-zorro-antd/icon';
 
 // 项目信息接口
 interface ProjectInfo {
@@ -38,11 +44,21 @@ interface EquipmentQueryResponse {
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    NzInputModule,
+    NzIconModule,
+    NzButtonModule
+  ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
 export class AppComponent {
+  constructor(private iconService: NzIconService) {
+    this.iconService.addIcon(SearchOutline);
+  }
+
   title = 'table-generation-tool';
   projectData: ProjectInfo[] = [];
   selectedProject: ProjectInfo | null = null;

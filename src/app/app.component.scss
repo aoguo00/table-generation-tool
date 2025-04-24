@@ -313,3 +313,19 @@ tr.selected:hover {
     }
   }
 }
+
+.search-wrapper {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+
+  input {
+    flex: 1;
+  }
+
+  button {
+    min-width: 40px;
+    padding: 0 8px;
+    height: 32px;
+  }
+}
