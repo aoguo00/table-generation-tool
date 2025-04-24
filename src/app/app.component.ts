@@ -5,6 +5,9 @@ import { getCurrentWindow } from '@tauri-apps/api/window';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzTableModule } from 'ng-zorro-antd/table';
+import { NzTabsModule } from 'ng-zorro-antd/tabs';
+import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { FormsModule } from '@angular/forms';
 import { SearchOutline } from '@ant-design/icons-angular/icons';
 import { NzIconService } from 'ng-zorro-antd/icon';
@@ -49,7 +52,10 @@ interface EquipmentQueryResponse {
     FormsModule,
     NzInputModule,
     NzIconModule,
-    NzButtonModule
+    NzButtonModule,
+    NzTableModule,
+    NzTabsModule,
+    NzSpinModule
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'

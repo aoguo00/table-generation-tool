@@ -1,9 +1,9 @@
 <div class="container">
   <!-- 顶部导航 -->
-  <div class="nav-tabs">
-    <div class="tab active">查询/上传</div>
-    <div class="tab">第三方设备点位</div>
-  </div>
+  <nz-tabset>
+    <nz-tab nzTitle="查询/上传"></nz-tab>
+    <nz-tab nzTitle="第三方设备点位"></nz-tab>
+  </nz-tabset>
 
   <!-- 查询条件 -->
   <div class="query-section">
@@ -26,85 +26,84 @@
         </div>
       </div>
 
-      <div class="button-group">
-        <button class="btn btn-clear" (click)="clearForm()" [disabled]="isLoading">清空</button>
-        <button class="btn btn-generate" (click)="generatePointTable()" [disabled]="isLoading">生成点表</button>
-        <button class="btn btn-upload" (click)="uploadPointTable('普通')" [disabled]="true">上传点表</button>
-        <button class="btn btn-upload-fat" (click)="uploadPointTable('FAT')" [disabled]="true">上传FAT点表</button>
-        <button class="btn btn-upload-hmi" (click)="uploadPointTable('HMI')" [disabled]="true">上传HMI点表</button>
-        <button class="btn btn-upload-plc" (click)="uploadPointTable('PLC')" [disabled]="true">上传PLC点表</button>
+      <div class="button-row">
+        <button nz-button nzType="default" (click)="clearForm()" [nzLoading]="isLoading">清空</button>
+        <button nz-button nzType="primary" (click)="generatePointTable()" [nzLoading]="isLoading">生成点表</button>
+        <button nz-button nzType="default" (click)="uploadPointTable('普通')" [disabled]="true">上传点表</button>
+        <button nz-button nzType="default" (click)="uploadPointTable('FAT')" [disabled]="true">上传FAT点表</button>
+        <button nz-button nzType="default" (click)="uploadPointTable('HMI')" [disabled]="true">上传HMI点表</button>
+        <button nz-button nzType="default" (click)="uploadPointTable('PLC')" [disabled]="true">上传PLC点表</button>
       </div>
     </div>
   </div>
 
   <!-- 加载状态 -->
-  <div class="loading-overlay" *ngIf="isLoading">
-    <div class="loading-spinner"></div>
-    <div>数据加载中...</div>
-  </div>
+  <nz-spin [nzSpinning]="isLoading" nzTip="数据加载中...">
 
-  <!-- 项目列表 -->
-  <div class="project-list-section" *ngIf="projectData.length > 0">
-    <h3>项目列表</h3>
-    <table class="project-table">
-      <thead>
-        <tr>
-          <th class="num-column">编号</th>
-          <th>项目名称</th>
-          <th>场站</th>
-          <th>项目编号</th>
-          <th>深化设计编号</th>
-          <th>客户名称</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let item of projectData; let i = index" 
-            [class.selected]="selectedProject === item"
-            (click)="selectProject(item)">
-          <td class="num-column">{{i + 1}}</td>
-          <td>{{item.project_name}}</td>
-          <td>{{item.station_name}}</td>
-          <td>{{item.project_number}}</td>
-          <td>{{item.design_number}}</td>
-          <td>{{item.customer_name}}</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+    <!-- 项目列表 -->
+    <div class="project-list-section" *ngIf="projectData.length > 0">
+      <h3>项目列表</h3>
+      <nz-table #projectTable [nzData]="projectData" 
+                [nzFrontPagination]="false" 
+                [nzShowPagination]="false">
+        <thead>
+          <tr>
+            <th nzWidth="50px">编号</th>
+            <th nzWidth="30%">项目名称</th>
+            <th nzWidth="12%">场站</th>
+            <th nzWidth="12%">项目编号</th>
+            <th nzWidth="12%">深化设计编号</th>
+            <th>客户名称</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of projectTable.data; let i = index" 
+              [class.selected]="selectedProject === item"
+              (click)="selectProject(item)">
+            <td>{{i + 1}}</td>
+            <td>{{item.project_name}}</td>
+            <td>{{item.station_name}}</td>
+            <td>{{item.project_number}}</td>
+            <td>{{item.design_number}}</td>
+            <td>{{item.customer_name}}</td>
+          </tr>
+        </tbody>
+      </nz-table>
+    </div>
 
-  <!-- 设备清单 -->
-  <div class="equipment-list-section" *ngIf="selectedProject">
-    <h3>设备清单 - {{selectedProject.station_name}}</h3>
-    
-    <table class="equipment-table">
-      <thead>
-        <tr>
-          <th>序号</th>
-          <th>设备名称</th>
-          <th>品牌</th>
-          <th>规格型号</th>
-          <th>技术参数</th>
-          <th>数量</th>
-          <th>单位</th>
-          <th>技术参数(外部)</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let item of equipmentData; let i = index">
-          <td>{{i + 1}}</td>
-          <td>{{item.name}}</td>
-          <td>{{item.brand}}</td>
-          <td>{{item.model}}</td>
-          <td>{{item.tech_param}}</td>
-          <td>{{item.quantity}}</td>
-          <td>{{item.unit}}</td>
-          <td>{{item.external_param}}</td>
-        </tr>
-        <tr *ngIf="equipmentData.length === 0 && !isLoading">
-          <td colspan="7" class="no-data">暂无设备数据</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+    <!-- 设备清单 -->
+    <div class="equipment-list-section" *ngIf="selectedProject">
+      <h3>设备清单 - {{selectedProject.station_name}}</h3>
+      
+      <nz-table #equipmentTable [nzData]="equipmentData"
+                [nzFrontPagination]="false"
+                [nzShowPagination]="false">
+        <thead>
+          <tr>
+            <th nzWidth="50px">序号</th>
+            <th nzWidth="18%">设备名称</th>
+            <th nzWidth="8%">品牌</th>
+            <th nzWidth="12%">规格型号</th>
+            <th nzWidth="25%">技术参数</th>
+            <th nzWidth="60px">数量</th>
+            <th nzWidth="60px">单位</th>
+            <th>技术参数(外部)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of equipmentTable.data; let i = index">
+            <td>{{i + 1}}</td>
+            <td>{{item.name}}</td>
+            <td>{{item.brand}}</td>
+            <td>{{item.model}}</td>
+            <td>{{item.tech_param}}</td>
+            <td>{{item.quantity}}</td>
+            <td>{{item.unit}}</td>
+            <td>{{item.external_param}}</td>
+          </tr>
+        </tbody>
+      </nz-table>
+    </div>
+  </nz-spin>
 </div>
 

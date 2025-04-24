@@ -11,6 +11,9 @@ import { provideHttpClient } from '@angular/common/http';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzTableModule } from 'ng-zorro-antd/table';
+import { NzTabsModule } from 'ng-zorro-antd/tabs';
+import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { IconDefinition } from '@ant-design/icons-angular';
 import { SearchOutline } from '@ant-design/icons-angular/icons';
 
@@ -27,7 +30,10 @@ export const appConfig: ApplicationConfig = {
       FormsModule, 
       NzInputModule,
       NzButtonModule,
-      NzIconModule.forRoot(icons)
+      NzIconModule.forRoot(icons),
+      NzTableModule,
+      NzTabsModule,
+      NzSpinModule
     ), 
     provideAnimationsAsync(), 
     provideHttpClient()
