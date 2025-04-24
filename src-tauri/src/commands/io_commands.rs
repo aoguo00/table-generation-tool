@@ -1,45 +1,11 @@
 use tauri::command;
-use crate::application_services::jdy_api_services::jdy_api::create_jiandaoyun_client;
-use crate::model_domain::query_model::{ProjectQueryResponse, EquipmentQueryResponse};
-use crate::application_services::query_services::query_service::QueryService;
-use crate::application_services::excel_services::io_excel_services::{IOExcelService, convert_equipment_items};
 use std::collections::HashMap;
 use std::fs;
 use tauri::Manager;
 use tauri_plugin_dialog::DialogExt;
 use std::path::Path;
 use defer;
-
-#[command]
-pub async fn query_jdy_data_by_project_number(
-    #[allow(non_snake_case)] projectNumber: Option<String>
-) -> Result<ProjectQueryResponse, String> {
-    let client = create_jiandaoyun_client();
-    match client.query_by_project_number(projectNumber).await {
-        Ok(response) => {
-            // 使用查询服务处理数据
-            let project_response = QueryService::process_project_data(&response.data);
-            Ok(project_response)
-        },
-        Err(err) => Err(format!("查询数据失败: {}", err))
-    }
-}
-
-#[command]
-pub async fn query_equipment_by_station(
-    #[allow(non_snake_case)] stationName: String
-) -> Result<EquipmentQueryResponse, String> {
-    let client = create_jiandaoyun_client();
-    match client.query_equipment_by_station(stationName).await {
-        Ok(response) => {
-            // 使用查询服务处理数据
-            let equipment_response = QueryService::process_equipment_data(&response.data);
-            // println!("{:#?}",equipment_response);
-            Ok(equipment_response)
-        },
-        Err(err) => Err(format!("查询设备清单失败: {}", err))
-    }
-}
+use crate::application_services::excel_services::io_excel_services::{IOExcelService, convert_equipment_items};
 
 #[command]
 pub async fn process_station_data(
@@ -99,12 +65,16 @@ pub async fn generate_io_point_table(
         }
     });
     
-    // 使用阻塞调用打开保存文件对话框
-    let save_path = app_handle.dialog()
-        .file()
-        .add_filter("Excel文件", &["xlsx"])
-        .set_file_name(&file_name)
-        .blocking_save_file();
+    // 使用spawn_blocking处理文件保存对话框
+    let app_handle_clone = app_handle.clone();
+    let file_name_clone = file_name.clone();
+    let save_path = tauri::async_runtime::spawn_blocking(move || {
+        app_handle_clone.dialog()
+            .file()
+            .add_filter("Excel文件", &["xlsx"])
+            .set_file_name(&file_name_clone)
+            .blocking_save_file()
+    }).await.map_err(|e| format!("对话框操作失败: {}", e))?;
     
     // 处理结果
     match save_path {
@@ -113,13 +83,16 @@ pub async fn generate_io_point_table(
             let path_str = filepath.to_string();
             let dest_path = Path::new(&path_str);
             
-            // 将临时文件复制到用户选择的位置
-            match fs::copy(temp_path, dest_path) {
+            // 使用spawn_blocking处理文件复制操作
+            let temp_path = temp_path.to_path_buf();
+            let dest_path = dest_path.to_path_buf();
+            match tauri::async_runtime::spawn_blocking(move || {
+                fs::copy(&temp_path, &dest_path)
+            }).await.map_err(|e| format!("文件复制操作失败: {}", e))? {
                 Ok(_) => Ok(path_str),
                 Err(e) => Err(format!("保存文件失败: {}", e))
             }
         },
         None => Err("用户取消了保存操作".to_string())
     }
-}
-
+} 

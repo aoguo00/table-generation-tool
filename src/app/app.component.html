@@ -25,10 +25,10 @@
         </button>
         <button class="btn btn-clear" (click)="clearForm()" [disabled]="isLoading">清空</button>
         <button class="btn btn-generate" (click)="generatePointTable()" [disabled]="isLoading">生成点表</button>
-        <button class="btn btn-upload" (click)="uploadPointTable('普通')" [disabled]="isLoading">上传点表</button>
-        <button class="btn btn-upload-fat" (click)="uploadPointTable('FAT')" [disabled]="isLoading">上传FAT点表</button>
-        <button class="btn btn-upload-hmi" (click)="uploadPointTable('HMI')" [disabled]="isLoading">上传HMI点表</button>
-        <button class="btn btn-upload-plc" (click)="uploadPointTable('PLC')" [disabled]="isLoading">上传PLC点表</button>
+        <button class="btn btn-upload" (click)="uploadPointTable('普通')" [disabled]="true">上传点表</button>
+        <button class="btn btn-upload-fat" (click)="uploadPointTable('FAT')" [disabled]="true">上传FAT点表</button>
+        <button class="btn btn-upload-hmi" (click)="uploadPointTable('HMI')" [disabled]="true">上传HMI点表</button>
+        <button class="btn btn-upload-plc" (click)="uploadPointTable('PLC')" [disabled]="true">上传PLC点表</button>
       </div>
     </div>
   </div>

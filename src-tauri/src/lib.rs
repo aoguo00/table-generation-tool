@@ -12,10 +12,10 @@ pub fn run() {
     .plugin(tauri_plugin_os::init())
     .plugin(tauri_plugin_process::init())
     .invoke_handler(tauri::generate_handler![
-      query_jdy_data_by_project_number,
-      query_equipment_by_station,
-      process_station_data,
-      generate_io_point_table
+      query_jdy_data_by_project_number,//查询JDY数据
+      query_equipment_by_station,//查询设备数据
+      process_station_data,//处理场站数据
+      generate_io_point_table//生成IO点表
     ])
     .setup(|app| {
       if cfg!(debug_assertions) {
