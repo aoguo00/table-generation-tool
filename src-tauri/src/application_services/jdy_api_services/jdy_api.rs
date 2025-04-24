@@ -155,6 +155,7 @@ impl JiandaoyunApiClient {
     /// 处理分页逻辑，自动获取所有满足条件的数据
     async fn paginated_query(&self, mut query_builder: JiandaoyunQueryBuilder) -> Result<DataQueryResponse> {
         let url = format!("{}/app/entry/data/list", API_BASE_URL);
+        // 提前准备headers，只准备一次
         let headers = self.prepare_headers()?;
 
         let mut all_data = vec![];
@@ -168,7 +169,7 @@ impl JiandaoyunApiClient {
 
             let response = self.client
                 .post(&url)
-                .headers(headers.clone())
+                .headers(headers.clone()) // reqwest需要HeaderMap值而不是引用，所以我们仍需克隆，但至少只在循环内部进行
                 .json(&payload)
                 .send()
                 .await?;

@@ -31,3 +31,7 @@ tauri-plugin-dialog = "2.0.0"  # 对话框插件
 reqwest = { version = "0.12.15", features = ["json"] }  # HTTP客户端库，支持异步请求和JSON处理
 anyhow = "1.0"  # 简化错误处理的库，提供统一的错误类型
 umya-spreadsheet = "2.3.0" # 处理excel
+once_cell = "1.21.3"
+thiserror = "2.0.12"
+tempfile = "3.8.1"  # 安全管理临时文件
+defer = "0.1.0"  # 提供延迟执行功能，类似Go语言的defer

@@ -119,7 +119,9 @@ name = "app"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "defer",
  "log",
+ "once_cell",
  "reqwest",
  "serde",
  "serde_json",
@@ -131,6 +133,8 @@ dependencies = [
  "tauri-plugin-os",
  "tauri-plugin-process",
  "tauri-plugin-shell",
+ "tempfile",
+ "thiserror 2.0.12",
  "umya-spreadsheet",
 ]
 
@@ -802,6 +806,12 @@ dependencies = [
  "quote",
  "syn 2.0.100",
 ]
+
+[[package]]
+name = "defer"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "647605a6345d5e89c3950a36a638c56478af9b414c55c6f2477c73b115f9acde"
 
 [[package]]
 name = "deranged"

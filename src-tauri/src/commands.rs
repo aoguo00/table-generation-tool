@@ -1,14 +1,14 @@
 use tauri::command;
-use crate::application_services::jdy_api_services::jdy_api::{create_jiandaoyun_client, DataQueryResponse};
+use crate::application_services::jdy_api_services::jdy_api::create_jiandaoyun_client;
 use crate::model_domain::query_model::{ProjectQueryResponse, EquipmentQueryResponse};
 use crate::application_services::query_services::query_service::QueryService;
-use crate::application_services::excel_services::io_excel_services::{IOExcelService, EquipmentData, convert_equipment_items};
+use crate::application_services::excel_services::io_excel_services::{IOExcelService, convert_equipment_items};
 use std::collections::HashMap;
 use std::fs;
 use tauri::Manager;
 use tauri_plugin_dialog::DialogExt;
 use std::path::Path;
-use tauri_plugin_dialog::FilePath;
+use defer;
 
 #[command]
 pub async fn query_jdy_data_by_project_number(
@@ -89,6 +89,16 @@ pub async fn generate_io_point_table(
     // 获取应用句柄
     let app_handle = window.app_handle();
     
+    // 创建临时文件的路径
+    let temp_path = Path::new(&temp_file_path);
+    
+    // 确保在函数结束时删除临时文件
+    let _cleanup = defer::defer(|| {
+        if let Err(e) = fs::remove_file(temp_path) {
+            eprintln!("删除临时文件失败: {}", e);
+        }
+    });
+    
     // 使用阻塞调用打开保存文件对话框
     let save_path = app_handle.dialog()
         .file()
@@ -102,10 +112,9 @@ pub async fn generate_io_point_table(
             // 将FilePath转换为标准路径
             let path_str = filepath.to_string();
             let dest_path = Path::new(&path_str);
-            let src_path = Path::new(&temp_file_path);
             
             // 将临时文件复制到用户选择的位置
-            match fs::copy(src_path, dest_path) {
+            match fs::copy(temp_path, dest_path) {
                 Ok(_) => Ok(path_str),
                 Err(e) => Err(format!("保存文件失败: {}", e))
             }
