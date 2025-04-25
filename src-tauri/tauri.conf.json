@@ -2,9 +2,9 @@
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "table-generation-tool",
   "version": "0.1.0",
-  "identifier": "com.tauri.dev",
+  "identifier": "com.table-generation-tool.app",
   "build": {
-    "frontendDist": "../dist",
+    "frontendDist": "../dist/table-generation-tool/browser",
     "devUrl": "http://localhost:4200",
     "beforeDevCommand": "npm run dev",
     "beforeBuildCommand": "npm run build"
