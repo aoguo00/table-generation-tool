@@ -1,83 +1,91 @@
 .container {
-  padding: 24px;
+  padding: 16px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
   
   .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #f0f0f0;
+    margin-bottom: 16px;
+    flex-shrink: 0; /* 防止头部被压缩 */
     
     h2 {
       margin: 0;
+      font-size: 18px;
     }
     
     .header-buttons {
       display: flex;
-      gap: 12px;
-      
-      button {
-        margin-left: 8px;
-      }
+      gap: 8px;
+    }
+  }
+  
+  /* 穿梭框区域样式 */
+  .transfer-section {
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #f0f0f0;
+    flex-shrink: 0; /* 防止被压缩 */
+    height: 45vh; /* 占据视口高度的45% */
+    
+    h3 {
+      margin-top: 0;
+      margin-bottom: 12px;
+      font-size: 16px;
+      font-weight: normal;
+      color: #666;
     }
   }
   
   .device-table-section {
-    background: #fff;
-    padding: 16px;
-    border-radius: 4px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    flex: 1; /* 占据剩余空间 */
+    display: flex;
+    flex-direction: column;
+    height: 45vh; /* 占据视口高度的45% */
+    overflow: hidden; /* 防止溢出 */
     
-    // 表格行样式
-    ::ng-deep .ant-table-tbody {
-      tr {
-        &:hover {
-          td {
-            background-color: #f0f7ff;
-          }
-        }
-      }
+    h3 {
+      margin-top: 0;
+      margin-bottom: 12px;
+      font-size: 16px;
+      font-weight: normal;
+      color: #666;
+      flex-shrink: 0; /* 防止被压缩 */
     }
     
-    // 编辑状态行样式
-    tr.editing {
-      background-color: #f6ffed;
+    .ant-spin-container {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
     }
     
-    // 按钮样式
-    button {
-      padding: 0 8px;
-      margin-right: 8px;
-      
-      &.save-btn {
-        margin-right: 8px;
-        background-color: #52c41a;
-        border-color: #52c41a;
+    ::ng-deep {
+      .ant-table-wrapper {
+        flex: 1;
+        height: calc(100% - 30px); /* 减去标题高度 */
       }
       
-      &.cancel-btn {
-        color: #ff4d4f;
-        border-color: #ff4d4f;
-        
-        &:hover {
-          color: #fff;
-          background-color: #ff4d4f;
-        }
+      .ant-table {
+        height: 100%;
       }
       
-      &.delete-btn {
-        color: #ff4d4f;
-        border-color: #ff4d4f;
-        
-        &:hover {
-          color: #fff;
-          background-color: #ff4d4f;
-        }
+      .ant-table-body {
+        height: calc(45vh - 120px) !important; /* 动态计算表格主体高度 */
+        min-height: 200px;
       }
-    }
-    
-    // 输入框样式
-    nz-input-number {
-      width: 100%;
     }
   }
+}
+
+/* 操作按钮样式 */
+.delete-btn {
+  margin-left: 8px;
+}
+
+.save-btn {
+  margin-right: 8px;
 }

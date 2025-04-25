@@ -2,31 +2,29 @@
   <!-- 查询条件 -->
   <div class="query-section">
     <div class="query-form">
-      <div class="form-row">
-        <div class="form-group">
+      <!-- 将所有元素放在同一行并居中 -->
+      <div class="single-row-centered">
+        <div class="form-item">
           <label>项目编号:</label>
-          <div class="search-wrapper">
+          <div class="input-group">
             <input type="text" nz-input #projectInput placeholder="输入项目编号" value="OPP.23110200272">
-            <button nz-button nzType="primary" (click)="queryProject(projectInput.value)">
+            <button nz-button nzType="primary" (click)="queryProject(projectInput.value)" class="search-button">
               <span nz-icon nzType="search"></span>
             </button>
           </div>
         </div>
-        <div class="form-group">
+        
+        <div class="form-item">
           <label>场站编号:</label>
-          <div class="search-wrapper">
+          <div class="input-group">
             <input type="text" nz-input #stationInput [(ngModel)]="stationNumber" (input)="validateStation()" placeholder="输入场站编号">
           </div>
         </div>
-        <div class="form-group">
-          <div class="search-wrapper">
-            <button nz-button nzType="primary" (click)="clearForm()" [nzLoading]="isLoading">清空</button>
-            <button nz-button nzType="primary" [nzLoading]="isLoading" [disabled]="!selectedProject || !isStationValid" (click)="goToDeviceTable()">下一步</button>
-          </div>
+        
+        <div class="form-item button-group">
+          <button nz-button nzType="default" (click)="clearForm()" [nzLoading]="isLoading">清空</button>
+          <button nz-button nzType="primary" [nzLoading]="isLoading" [disabled]="!selectedProject || !isStationValid" (click)="goToDeviceTable()">下一步</button>
         </div>
-      </div>
-      <div class="button-row">
-        <button nz-button nzType="primary" (click)="generatePointTable()" [nzLoading]="isLoading">生成点表</button>
       </div>
     </div>
   </div>

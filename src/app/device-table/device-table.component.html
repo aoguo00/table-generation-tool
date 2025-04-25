@@ -2,6 +2,7 @@
   <div class="header">
     <h2>第三方设备点位</h2>
     <div class="header-buttons">
+      <button nz-button nzType="primary" (click)="generatePointTable()">生成点表</button>
       <button nz-button nzType="primary" (click)="addDevice()">添加设备</button>
       <button nz-button nzType="primary" (click)="saveAllDevices()">保存</button>
       <button nz-button nzType="default" (click)="goBack()">
@@ -10,23 +11,22 @@
     </div>
   </div>
 
+  <!-- 穿梭框组件 - 单独的区域 -->
+  <div class="transfer-section">
+    <h3>从左侧选择设备添加到右侧 →</h3>
+    <app-select-device (rightItemsChange)="handleRightItemsChange($event)"></app-select-device>
+  </div>
 
-  <app-select-device></app-select-device>
-
-
-
-
-
-
-
-  <!-- 加载状态 -->
-  <nz-spin [nzSpinning]="isLoading" nzTip="数据加载中...">
-    <!-- 设备表 - 不使用分页，使用滚动显示 -->
-    <div class="device-table-section">
+  <!-- 设备表区域 - 独立区域 -->
+  <div class="device-table-section">
+    <h3>已选设备列表</h3>
+    
+    <!-- 加载状态 -->
+    <nz-spin [nzSpinning]="isLoading" nzTip="数据加载中...">
       <nz-table 
         #deviceTable 
         [nzData]="deviceData" 
-        [nzScroll]="scrollConfig"
+        [nzScroll]="{ y: '38vh' }"
         [nzFrontPagination]="false" 
         [nzShowPagination]="false">
         
@@ -81,6 +81,6 @@
           </tr>
         </tbody>
       </nz-table>
-    </div>
-  </nz-spin>
+    </nz-spin>
+  </div>
 </div>

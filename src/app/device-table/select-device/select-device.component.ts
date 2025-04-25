@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
@@ -54,6 +54,11 @@ export class SelectDeviceComponent implements OnInit {
    */
   showSearch = true;
 
+  /**
+   * 当右侧穿梭框数据变化时发出事件
+   */
+  @Output() rightItemsChange = new EventEmitter<any[]>();
+
   constructor(private message: NzMessageService) {}
 
   ngOnInit(): void {
@@ -73,6 +78,17 @@ export class SelectDeviceComponent implements OnInit {
 
     // 初始化右侧列表数据
     [2, 3].forEach(idx => (this.list[idx].direction = 'right'));
+    
+    // 首次加载时发送右侧数据
+    this.emitRightItems();
+  }
+
+  /**
+   * 发送右侧穿梭框的数据给父组件
+   */
+  private emitRightItems(): void {
+    const rightItems = this.list.filter(item => item.direction === 'right');
+    this.rightItemsChange.emit(rightItems);
   }
 
   /**
@@ -101,6 +117,9 @@ export class SelectDeviceComponent implements OnInit {
       }
       return e;
     });
+    
+    // 当数据变化时，发送右侧数据给父组件
+    this.emitRightItems();
   }
 
   /**
@@ -126,6 +145,9 @@ export class SelectDeviceComponent implements OnInit {
     // 设置为非编辑状态
     data['isEditing'] = false;
     this.message.success('保存成功');
+    
+    // 编辑完成后，更新右侧数据
+    this.emitRightItems();
   }
 
   /**

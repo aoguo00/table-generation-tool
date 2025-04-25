@@ -56,8 +56,8 @@ export class DeviceTableComponent implements OnInit {
   deviceData: DeviceItem[] = [];
   // 加载状态
   isLoading = false;
-  // 表格滚动配置 - 设置高度，使用滚轮查看
-  scrollConfig = { x: '800px', y: '600px' };
+  // Tauri应用标志
+  isTauriApp = false;
   
   constructor(
     private message: NzMessageService,
@@ -66,8 +66,33 @@ export class DeviceTableComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    // 检查是否在Tauri环境中
+    this.checkTauriEnvironment();
+    
+    // 先打印共享服务中的数据，方便调试
+    console.log('初始化设备表组件, 共享服务数据：', {
+      selectedProject: this.sharedDataService.getSelectedProject(),
+      equipmentData: this.sharedDataService.getEquipmentData(),
+      deviceTableData: this.sharedDataService.getDeviceTableData(),
+      stationNumber: this.sharedDataService.getStationNumber()
+    });
+    
     // 初始化加载数据
     this.loadDeviceData();
+  }
+
+  /**
+   * 检查是否在Tauri环境中运行
+   */
+  async checkTauriEnvironment(): Promise<void> {
+    try {
+      const { getVersion } = await import('@tauri-apps/api/app');
+      await getVersion();
+      this.isTauriApp = true;
+    } catch (error) {
+      this.isTauriApp = false;
+      console.log('Running in web environment');
+    }
   }
 
   /**
@@ -76,10 +101,28 @@ export class DeviceTableComponent implements OnInit {
   loadDeviceData(): void {
     this.isLoading = true;
     
-    // 从共享服务获取数据
-    const savedData = this.sharedDataService.getDeviceTableData();
-    if (savedData && savedData.length > 0) {
-      this.deviceData = savedData;
+    // 从共享服务获取设备表数据
+    const savedTableData = this.sharedDataService.getDeviceTableData();
+    if (savedTableData && savedTableData.length > 0) {
+      this.deviceData = savedTableData;
+      this.isLoading = false;
+      return;
+    }
+    
+    // 如果没有设备表数据，尝试从设备清单中转换
+    const equipmentData = this.sharedDataService.getEquipmentData();
+    if (equipmentData && equipmentData.length > 0) {
+      console.log('从设备清单中加载数据', equipmentData);
+      // 转换格式
+      this.deviceData = equipmentData.map((item, index) => ({
+        id: index + 1,
+        name: item.name,
+        tagNumber: `TAG-${item.id}`, // 默认位号
+        quantity: item.quantity
+      }));
+      
+      // 保存到共享服务
+      this.sharedDataService.setDeviceTableData([...this.deviceData]);
       this.isLoading = false;
       return;
     }
@@ -229,5 +272,142 @@ export class DeviceTableComponent implements OnInit {
     // 这里可以发送数据到后端保存
     this.message.success('设备清单已保存');
     console.log('设备数据：', this.deviceData);
+  }
+
+  /**
+   * 生成点表 - 严格按照home.component.ts中的实现
+   */
+  async generatePointTable() {
+    if (!this.validateBeforeGeneration()) {
+      return;
+    }
+    
+    this.isLoading = true;
+    try {
+      // 加载Tauri API
+      const { invoke } = await import('@tauri-apps/api/core');
+      const { getCurrentWindow } = await import('@tauri-apps/api/window');
+
+      // 准备数据和生成点表
+      const equipmentItems = this.prepareEquipmentData();
+      const filePath = await this.callGeneratePointTable(invoke, getCurrentWindow, equipmentItems);
+      
+      // 处理生成结果
+      await this.handleGeneratedFile(invoke, filePath);
+    } catch (error) {
+      console.error('生成IO点表失败:', error);
+      this.message.error('生成IO点表失败: ' + error);
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  /**
+   * 验证生成点表前的条件
+   * @returns 是否通过验证
+   */
+  private validateBeforeGeneration(): boolean {
+    const selectedProject = this.sharedDataService.getSelectedProject();
+    if (!selectedProject) {
+      this.message.warning('请先选择一个项目');
+      return false;
+    }
+    
+    if (!this.isTauriApp) {
+      this.message.warning('此功能仅在桌面应用中可用');
+      return false;
+    }
+    
+    return true;
+  }
+
+  /**
+   * 准备设备数据
+   * @returns 处理后的设备数据
+   */
+  private prepareEquipmentData() {
+    const selectedProject = this.sharedDataService.getSelectedProject();
+    const equipmentData = this.sharedDataService.getEquipmentData();
+    
+    if (!equipmentData || equipmentData.length === 0) {
+      console.warn('原始设备数据为空，可能导致生成的点表没有数据');
+    }
+    
+    console.log('准备生成点表的数据源:', equipmentData);
+    
+    return equipmentData.map(item => ({
+      ...item,
+      station_name: selectedProject!.station_name
+    }));
+  }
+
+  /**
+   * 调用后端生成IO点表
+   * @param invoke Tauri invoke函数
+   * @param getCurrentWindow 获取当前窗口函数
+   * @param equipmentItems 设备数据
+   * @returns 生成的文件路径
+   */
+  private async callGeneratePointTable(invoke: any, getCurrentWindow: any, equipmentItems: any[]) {
+    // 获取当前窗口
+    const currentWindow = await getCurrentWindow();
+    const selectedProject = this.sharedDataService.getSelectedProject();
+    
+    // 调用后端生成IO点表，严格按照原来的参数格式
+    console.log('发送到后端的参数:', {
+      equipmentData: equipmentItems,
+      stationName: selectedProject!.station_name
+    });
+    
+    const filePath: string = await invoke('generate_io_point_table', {
+      equipmentData: equipmentItems,
+      stationName: selectedProject!.station_name,
+      window: currentWindow
+    });
+    
+    console.log('生成的IO点表路径:', filePath);
+    return filePath;
+  }
+
+  /**
+   * 处理生成的文件
+   * @param invoke Tauri invoke函数
+   * @param filePath 文件路径
+   */
+  private async handleGeneratedFile(invoke: any, filePath: string) {
+    // 自动打开生成的文件
+    await invoke('open_file', { path: filePath });
+    this.message.success(`IO点表已生成并打开: ${filePath}`);
+  }
+
+  /**
+   * 处理穿梭框右侧数据变化的事件
+   * @param rightItems 穿梭框右侧的数据项
+   */
+  handleRightItemsChange(rightItems: any[]): void {
+    console.log('穿梭框右侧数据变化:', rightItems);
+    
+    // 将穿梭框数据转换为DeviceItem格式
+    const newDevices: DeviceItem[] = rightItems.map((item, index) => ({
+      id: parseInt(item.key) + 1000, // 使用一个不同的ID范围，避免冲突
+      name: item.title,
+      tagNumber: item.tag || '',
+      quantity: item.quantity || 1,
+      isEditing: false
+    }));
+    
+    // 只保留新设备列表中的设备和手动添加的设备（ID为负数的）
+    this.deviceData = [
+      ...this.deviceData.filter(item => item.id < 0), // 保留手动添加的设备
+      ...newDevices // 添加从穿梭框来的设备
+    ];
+    
+    // 保存到共享服务
+    this.sharedDataService.setDeviceTableData([...this.deviceData]);
+    
+    // 触发变更检测（防止视图不更新）
+    setTimeout(() => {
+      this.deviceData = [...this.deviceData];
+    }, 0);
   }
 }

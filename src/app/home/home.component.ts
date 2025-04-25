@@ -216,51 +216,6 @@ export class HomeComponent implements OnInit {
     }
   }
   
-  async generatePointTable() {
-    if (!this.selectedProject) {
-      this.message.warning('请先选择一个项目');
-      return;
-    }
-    
-    if (!this.isTauriApp) {
-      this.message.warning('此功能仅在桌面应用中可用');
-      return;
-    }
-    
-    this.isLoading = true;
-    try {
-      const { invoke } = await import('@tauri-apps/api/core');
-      const { getCurrentWindow } = await import('@tauri-apps/api/window');
-
-      // 构造发送给后端的数据结构
-      const equipmentItems = this.equipmentData.map(item => ({
-        ...item,
-        station_name: this.selectedProject!.station_name
-      }));
-
-      // 获取当前窗口
-      const currentWindow = await getCurrentWindow();
-      
-      // 调用后端生成IO点表
-      const filePath: string = await invoke('generate_io_point_table', {
-        equipmentData: equipmentItems,
-        stationName: this.selectedProject.station_name,
-        window: currentWindow
-      });
-      
-      console.log('生成的IO点表路径:', filePath);
-      
-      // 自动打开生成的文件
-      await invoke('open_file', { path: filePath });
-      this.message.success(`IO点表已生成并打开: ${filePath}`);
-    } catch (error) {
-      console.error('生成IO点表失败:', error);
-      this.message.error('生成IO点表失败: ' + error);
-    } finally {
-      this.isLoading = false;
-    }
-  }
-  
   validateStation() {
     this.isStationValid = this.stationNumber.trim() !== '';
     // 保存场站号到共享服务
