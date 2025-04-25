@@ -12,8 +12,8 @@ import { SearchOutline } from '@ant-design/icons-angular/icons';
 import { NzIconService } from 'ng-zorro-antd/icon';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzMessageModule } from 'ng-zorro-antd/message';
-import { StationListComponent } from '../app/station-list/station-list.component';
-import { SharedDataService } from '../app/shared-data.service';
+import { StationListComponent } from './station-list/station-list.component';
+import { SharedDataService } from '../shared-data.service';
 
 // 项目信息接口
 interface ProjectInfo {

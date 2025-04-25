@@ -7,8 +7,8 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
 import { FormsModule } from '@angular/forms';
 import { NzMessageModule, NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
-import { EquipmentModalComponent } from '../equipment-modal/equipment-modal.component';
-import { SharedDataService } from '../shared-data.service';
+import { DeviceListComponent } from '../device-list/device-list.component';
+import { SharedDataService } from '../../shared-data.service';
 
 // 项目信息接口
 interface ProjectInfo {
@@ -36,7 +36,7 @@ interface ProjectInfo {
     NzIconModule,
     NzMessageModule,
     NzModalModule,
-    EquipmentModalComponent
+    DeviceListComponent
   ],
   templateUrl: './station-list.component.html',
   styleUrl: './station-list.component.scss'
@@ -95,7 +95,7 @@ export class StationListComponent implements OnInit {
       // 打开设备清单弹窗
       this.modalService.create({
         nzTitle: `设备清单 - ${project.station_name}`,
-        nzContent: EquipmentModalComponent,
+        nzContent: DeviceListComponent,
         nzWidth: '80%',
         nzFooter: null,
         nzData: {

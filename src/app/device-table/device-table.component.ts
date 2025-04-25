@@ -10,6 +10,10 @@ import { NzInputNumberModule } from 'ng-zorro-antd/input-number';
 import { NzMessageModule, NzMessageService } from 'ng-zorro-antd/message';
 import { Router } from '@angular/router';
 import { SharedDataService } from '../shared-data.service';
+import { NzSwitchModule } from 'ng-zorro-antd/switch';
+import { NzTagModule } from 'ng-zorro-antd/tag';
+import { NzTransferModule, TransferChange, TransferItem, TransferSelectChange } from 'ng-zorro-antd/transfer';
+import { SelectDeviceComponent } from './select-device/select-device.component';
 
 /**
  * 设备项接口
@@ -38,7 +42,11 @@ interface DeviceItem {
     NzIconModule,
     NzSpinModule,
     NzInputNumberModule,
-    NzMessageModule
+    NzMessageModule,
+    NzSwitchModule,
+    NzTagModule,
+    NzTransferModule,
+    SelectDeviceComponent
   ],
   templateUrl: './device-table.component.html',
   styleUrl: './device-table.component.scss'

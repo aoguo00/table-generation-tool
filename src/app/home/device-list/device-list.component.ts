@@ -24,7 +24,7 @@ interface EquipmentItem {
  * 使用固定表头表格显示设备清单
  */
 @Component({
-  selector: 'app-equipment-modal',
+  selector: 'app-device-list',
   standalone: true,
   imports: [
     CommonModule,
@@ -35,10 +35,10 @@ interface EquipmentItem {
     NzIconModule,
     NzMessageModule
   ],
-  templateUrl: './equipment-modal.component.html',
-  styleUrl: './equipment-modal.component.scss'
+  templateUrl: './device-list.component.html',
+  styleUrl: './device-listcomponent.scss'
 })
-export class EquipmentModalComponent implements OnInit {
+export class DeviceListComponent implements OnInit {
   // 当前场站名称
   stationName: string = '';
   // 设备数据
