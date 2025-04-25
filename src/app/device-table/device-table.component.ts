@@ -88,7 +88,7 @@ export class DeviceTableComponent implements OnInit {
       // 保存到共享服务
       this.sharedDataService.setDeviceTableData([...this.deviceData]);
       this.isLoading = false;
-    }, 1000);
+    }, 100);
   }
 
   /**
@@ -129,6 +129,10 @@ export class DeviceTableComponent implements OnInit {
 
     // 退出编辑状态
     data.isEditing = false;
+    
+    // 触发变更检测
+    this.deviceData = [...this.deviceData];
+    
     // 更新保存的数据
     this.sharedDataService.setDeviceTableData([...this.deviceData]);
     this.message.success('保存成功');
@@ -140,12 +144,27 @@ export class DeviceTableComponent implements OnInit {
    * @param index 设备项索引
    */
   cancelEdit(data: DeviceItem, index: number): void {
-    // 如果是新添加的记录，则直接删除
+    // 如果是新添加的行（ID为负数），则删除该行
     if (data.id < 0) {
+      // 删除该行
       this.deviceData.splice(index, 1);
+      this.deviceData = [...this.deviceData]; // 创建新数组以触发变更检测
+      this.message.info('已取消添加');
     } else {
-      // 否则退出编辑状态
+      // 如果是编辑现有行，则只退出编辑状态，不删除数据
       data.isEditing = false;
+      
+      // 恢复原始数据（从服务中获取）
+      const savedData = this.sharedDataService.getDeviceTableData();
+      const originalItem = savedData.find(item => item.id === data.id);
+      if (originalItem) {
+        // 恢复原始数据
+        data.name = originalItem.name;
+        data.tagNumber = originalItem.tagNumber;
+        data.quantity = originalItem.quantity;
+      }
+      
+      this.message.info('已取消编辑');
     }
     
     // 更新保存的数据
