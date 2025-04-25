@@ -1,0 +1,37 @@
+<div class="station-list-container">
+  <h3>场站列表</h3>
+  
+  <!-- 使用nz-table组件，不设置固定表头 -->
+  <nz-table 
+    #stationTable 
+    [nzData]="projectData" 
+    [nzFrontPagination]="false" 
+    [nzShowPagination]="false"
+    [nzLoading]="isLoading">
+    
+    <thead>
+      <tr>
+        <th [nzWidth]="'5%'">编号</th>
+        <th [nzWidth]="'20%'">项目名称</th>
+        <th [nzWidth]="'15%'">场站</th>
+        <th [nzWidth]="'15%'">项目编号</th>
+        <th [nzWidth]="'15%'">深化设计编号</th>
+        <th [nzWidth]="'15%'">客户名称</th>
+
+      </tr>
+    </thead>
+    
+    <tbody>
+      <tr *ngFor="let item of stationTable.data; let i = index" 
+          (click)="viewEquipment(item)" 
+          [class.selected]="selectedProject === item">
+        <td>{{i + 1}}</td>
+        <td>{{item.project_name}}</td>
+        <td>{{item.station_name}}</td>
+        <td>{{item.project_number}}</td>
+        <td>{{item.design_number}}</td>
+        <td>{{item.customer_name}}</td>
+      </tr>
+    </tbody>
+  </nz-table>
+</div>

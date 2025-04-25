@@ -1,0 +1,83 @@
+.container {
+  padding: 24px;
+  
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    
+    h2 {
+      margin: 0;
+    }
+    
+    .header-buttons {
+      display: flex;
+      gap: 12px;
+      
+      button {
+        margin-left: 8px;
+      }
+    }
+  }
+  
+  .device-table-section {
+    background: #fff;
+    padding: 16px;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    
+    // 表格行样式
+    ::ng-deep .ant-table-tbody {
+      tr {
+        &:hover {
+          td {
+            background-color: #f0f7ff;
+          }
+        }
+      }
+    }
+    
+    // 编辑状态行样式
+    tr.editing {
+      background-color: #f6ffed;
+    }
+    
+    // 按钮样式
+    button {
+      padding: 0 8px;
+      margin-right: 8px;
+      
+      &.save-btn {
+        margin-right: 8px;
+        background-color: #52c41a;
+        border-color: #52c41a;
+      }
+      
+      &.cancel-btn {
+        color: #ff4d4f;
+        border-color: #ff4d4f;
+        
+        &:hover {
+          color: #fff;
+          background-color: #ff4d4f;
+        }
+      }
+      
+      &.delete-btn {
+        color: #ff4d4f;
+        border-color: #ff4d4f;
+        
+        &:hover {
+          color: #fff;
+          background-color: #ff4d4f;
+        }
+      }
+    }
+    
+    // 输入框样式
+    nz-input-number {
+      width: 100%;
+    }
+  }
+}

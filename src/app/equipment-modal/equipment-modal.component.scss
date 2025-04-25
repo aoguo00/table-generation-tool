@@ -1,0 +1,25 @@
+.equipment-modal-container {
+  padding: 0 16px;
+  
+  // 表格内容样式
+  ::ng-deep .ant-table-body {
+    max-height: 65vh !important;
+    overflow-y: auto;
+  }
+  
+  // 表格容器样式
+  ::ng-deep .ant-table-container {
+    border-radius: 4px;
+    border: 1px solid #f0f0f0;
+  }
+  
+  // 底部按钮区样式
+  .modal-footer {
+    margin-top: 16px;
+    text-align: right;
+    
+    button {
+      margin-left: 8px;
+    }
+  }
+} 

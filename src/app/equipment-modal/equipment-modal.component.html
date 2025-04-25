@@ -1,0 +1,44 @@
+<div class="equipment-modal-container">
+  <!-- 加载状态 -->
+  <nz-spin [nzSpinning]="isLoading" nzTip="数据加载中...">
+    <!-- 设备清单表格 - 使用滚动条替代分页 -->
+    <nz-table 
+      #equipmentTable 
+      [nzData]="equipmentData"
+      [nzScroll]="scrollConfig"
+      [nzFrontPagination]="false"
+      [nzShowPagination]="false">
+      
+      <thead>
+        <tr>
+          <th [nzWidth]="'60px'" [nzLeft]="true">序号</th>
+          <th [nzWidth]="'15%'" [nzLeft]="true">设备名称</th>
+          <th [nzWidth]="'10%'">品牌</th>
+          <th [nzWidth]="'15%'">规格型号</th>
+          <th [nzWidth]="'25%'">技术参数</th>
+          <th [nzWidth]="'60px'">数量</th>
+          <th [nzWidth]="'60px'">单位</th>
+          <th>技术参数(外部)</th>
+        </tr>
+      </thead>
+      
+      <tbody>
+        <tr *ngFor="let item of equipmentTable.data; let i = index">
+          <td [nzLeft]="true">{{i + 1}}</td>
+          <td [nzLeft]="true">{{item.name}}</td>
+          <td>{{item.brand}}</td>
+          <td>{{item.model}}</td>
+          <td>{{item.tech_param}}</td>
+          <td>{{item.quantity}}</td>
+          <td>{{item.unit}}</td>
+          <td>{{item.external_param}}</td>
+        </tr>
+      </tbody>
+    </nz-table>
+  </nz-spin>
+  
+  <!-- 底部按钮 -->
+  <div class="modal-footer">
+    <button nz-button nzType="primary" (click)="close()">确定</button>
+  </div>
+</div> 
