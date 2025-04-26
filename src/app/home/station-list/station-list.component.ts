@@ -57,7 +57,7 @@ export class StationListComponent implements OnInit {
     private message: NzMessageService,
     private modalService: NzModalService,
     private sharedDataService: SharedDataService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     // 从共享服务中恢复选中的项目
@@ -75,22 +75,22 @@ export class StationListComponent implements OnInit {
   async viewEquipment(project: ProjectInfo): Promise<void> {
     // 更新选中的项目
     this.selectedProject = project;
-    
+
     // 发出选中事件
     this.projectSelected.emit(project);
-    
+
     // 保存选中项目到共享服务
     this.sharedDataService.setSelectedProject(project);
-    
+
     // 显示加载提示
     const loadingMsg = this.message.loading('正在加载设备清单数据...', { nzDuration: 0 });
-    
+
     // 等待设备数据加载完成
     await new Promise(resolve => setTimeout(resolve, 800));
-    
+
     // 关闭加载提示
     this.message.remove(loadingMsg.messageId);
-    
+
     try {
       // 打开设备清单弹窗
       this.modalService.create({
@@ -102,14 +102,14 @@ export class StationListComponent implements OnInit {
           stationName: project.station_name
         }
       });
-      
+
       // 获取设备数量并提示用户
       try {
         const { invoke } = await import('@tauri-apps/api/core');
-        const response: any = await invoke('query_equipment_by_station', { 
-          stationName: project.station_name 
+        const response: any = await invoke('query_equipment_by_station', {
+          stationName: project.station_name
         });
-        
+
         if (response && response.equipment_list) {
           const equipmentCount = response.equipment_list.length;
           // 显示选择场站和设备数量的提示

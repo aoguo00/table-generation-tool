@@ -84,28 +84,17 @@ export class HomeComponent implements OnInit {
   selectedProject: ProjectInfo | null = null;
   equipmentData: EquipmentItem[] = [];
   isLoading: boolean = false;
-  isTauriApp: boolean = false;
   stationNumber: string = '';
   isStationValid: boolean = false;
 
   async ngOnInit() {
-    // 检查是否在Tauri环境中
-    try {
-      const { getVersion } = await import('@tauri-apps/api/app');
-      await getVersion();
-      this.isTauriApp = true;
-    } catch (error) {
-      this.isTauriApp = false;
-      console.log('Running in web environment');
-    }
-    
     // 从共享服务中恢复数据
     this.loadSavedData();
-    
+
     // 初始化验证状态
     this.validateStation();
   }
-  
+
   /**
    * 从共享服务中加载已保存的数据
    */
@@ -114,51 +103,46 @@ export class HomeComponent implements OnInit {
     const savedProjectData = this.sharedDataService.getProjectData();
     const savedEquipmentData = this.sharedDataService.getEquipmentData();
     const savedStationNumber = this.sharedDataService.getStationNumber();
-    
+
     if (savedProject) {
       this.selectedProject = savedProject;
     }
-    
+
     if (savedProjectData && savedProjectData.length > 0) {
       this.projectData = savedProjectData;
     }
-    
+
     if (savedEquipmentData && savedEquipmentData.length > 0) {
       this.equipmentData = savedEquipmentData;
     }
-    
+
     if (savedStationNumber) {
       this.stationNumber = savedStationNumber;
     }
   }
-  
+
   async queryProject(projectNumber?: string) {
     if (!projectNumber) {
       this.message.warning('请输入项目编号');
       return;
     }
-    
-    if (!this.isTauriApp) {
-      this.message.warning('此功能仅在桌面应用中可用');
-      return;
-    }
-    
+
     this.isLoading = true;
     try {
       const { invoke } = await import('@tauri-apps/api/core');
-      const response: ProjectQueryResponse = await invoke('query_jdy_data_by_project_number', { 
-        projectNumber: projectNumber 
+      const response: ProjectQueryResponse = await invoke('query_jdy_data_by_project_number', {
+        projectNumber: projectNumber
       });
-      
+
       this.projectData = response.projects || [];
       this.equipmentData = [];
       this.selectedProject = null;
-      
+
       // 保存到共享服务
       this.sharedDataService.setProjectData(this.projectData);
       this.sharedDataService.setSelectedProject(null);
       this.sharedDataService.setEquipmentData([]);
-      
+
       console.log('获取到的项目数据:', response);
     } catch (error) {
       console.error('调用API失败:', error);
@@ -167,17 +151,17 @@ export class HomeComponent implements OnInit {
       this.isLoading = false;
     }
   }
-  
+
   clearForm() {
     this.projectData = [];
     this.equipmentData = [];
     this.selectedProject = null;
     this.stationNumber = '';
-    
+
     // 清空共享服务中的数据
     this.sharedDataService.clearAll();
   }
-  
+
   /**
    * 选择项目并加载设备清单
    * @param project 选中的项目
@@ -188,26 +172,23 @@ export class HomeComponent implements OnInit {
     this.sharedDataService.setSelectedProject(project);
     await this.loadEquipmentData(project.station_name);
   }
-  
-  async loadEquipmentData(stationName: string) {
-    if (!this.isTauriApp) {
-      this.message.warning('此功能仅在桌面应用中可用');
-      return;
-    }
 
+  async loadEquipmentData(stationName: string) {
     this.isLoading = true;
     this.equipmentData = [];
-    
+
     try {
       const { invoke } = await import('@tauri-apps/api/core');
-      const response: EquipmentQueryResponse = await invoke('query_equipment_by_station', { 
-        stationName: stationName 
+      const response: EquipmentQueryResponse = await invoke('query_equipment_by_station', {
+        stationName: stationName
       });
-      
+
       this.equipmentData = response.equipment_list || [];
-      
+
       // 保存到共享服务
       this.sharedDataService.setEquipmentData(this.equipmentData);
+
+      console.log('获取到的设备数据:', response);
     } catch (error) {
       console.error('查询设备清单失败:', error);
       this.message.error('查询设备清单失败: ' + error);
@@ -215,7 +196,7 @@ export class HomeComponent implements OnInit {
       this.isLoading = false;
     }
   }
-  
+
   validateStation() {
     this.isStationValid = this.stationNumber.trim() !== '';
     // 保存场站号到共享服务
@@ -231,18 +212,18 @@ export class HomeComponent implements OnInit {
       this.message.warning('请先选择一个项目');
       return;
     }
-    
+
     if (!this.isStationValid) {
       this.message.warning('请输入有效的场站编号');
       return;
     }
-    
+
     // 保存当前状态到共享服务
     this.sharedDataService.setProjectData(this.projectData);
     this.sharedDataService.setSelectedProject(this.selectedProject);
     this.sharedDataService.setEquipmentData(this.equipmentData);
     this.sharedDataService.setStationNumber(this.stationNumber);
-    
+
     // 跳转到设备表页面
     this.router.navigate(['/device-table']);
   }

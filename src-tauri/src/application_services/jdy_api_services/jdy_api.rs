@@ -1,7 +1,7 @@
+use anyhow::{anyhow, Result};
 use reqwest::header::{HeaderMap, HeaderValue, CONTENT_TYPE};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
-use anyhow::{Result, anyhow};
 
 /*
 JiandaoyunApiClient: 简道云API客户端，用于与简道云接口进行交互
@@ -46,12 +46,12 @@ impl FieldNames {
 
 /// 简道云查询构建器 - 用于构建API请求参数
 struct JiandaoyunQueryBuilder {
-    app_id: String,     // 应用ID
-    entry_id: String,   // 表单ID
-    data_id: String,    // 数据ID（用于分页）
+    app_id: String,      // 应用ID
+    entry_id: String,    // 表单ID
+    data_id: String,     // 数据ID（用于分页）
     fields: Vec<String>, // 要查询的字段列表
-    filter: Value,      // 过滤条件
-    limit: u32,         // 每页数据量限制
+    filter: Value,       // 过滤条件
+    limit: u32,          // 每页数据量限制
 }
 impl JiandaoyunQueryBuilder {
     /// 创建新的查询构建器
@@ -72,7 +72,6 @@ impl JiandaoyunQueryBuilder {
             limit: 100,
         }
     }
-
 
     /// 添加多个字段到查询
     fn add_fields(mut self, fields: &[&str]) -> Self {
@@ -102,7 +101,6 @@ impl JiandaoyunQueryBuilder {
         self
     }
 
-
     /// 构建最终的查询参数
     fn build(&self) -> Value {
         json!({
@@ -119,12 +117,12 @@ impl JiandaoyunQueryBuilder {
 /// 简道云数据查询响应
 #[derive(Debug, Serialize, Deserialize)]
 pub struct DataQueryResponse {
-    pub data: Vec<Value>,  // 查询结果数据数组
+    pub data: Vec<Value>, // 查询结果数据数组
 }
 
 /// 简道云API客户端
 pub struct JiandaoyunApiClient {
-    client: reqwest::Client,  // HTTP客户端
+    client: reqwest::Client, // HTTP客户端
 }
 
 impl JiandaoyunApiClient {
@@ -143,7 +141,7 @@ impl JiandaoyunApiClient {
         headers.insert(
             "Authorization",
             HeaderValue::from_str(&auth_value)
-                .map_err(|e| anyhow!("创建Authorization头失败: {}", e))?
+                .map_err(|e| anyhow!("创建Authorization头失败: {}", e))?,
         );
 
         headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
@@ -153,7 +151,10 @@ impl JiandaoyunApiClient {
     /// 通用的分页查询方法
     ///
     /// 处理分页逻辑，自动获取所有满足条件的数据
-    async fn paginated_query(&self, mut query_builder: JiandaoyunQueryBuilder) -> Result<DataQueryResponse> {
+    async fn paginated_query(
+        &self,
+        mut query_builder: JiandaoyunQueryBuilder,
+    ) -> Result<DataQueryResponse> {
         let url = format!("{}/app/entry/data/list", API_BASE_URL);
         // 提前准备headers，只准备一次
         let headers = self.prepare_headers()?;
@@ -167,7 +168,8 @@ impl JiandaoyunApiClient {
             query_builder = query_builder.with_data_id(&last_data_id);
             let payload = query_builder.build();
 
-            let response = self.client
+            let response = self
+                .client
                 .post(&url)
                 .headers(headers.clone()) // reqwest需要HeaderMap值而不是引用，所以我们仍需克隆，但至少只在循环内部进行
                 .json(&payload)
@@ -217,7 +219,10 @@ impl JiandaoyunApiClient {
     ///
     /// # 参数
     /// * `project_number` - 项目编号，可选，默认为"OPP.23110200272"
-    pub async fn query_by_project_number(&self, project_number: Option<String>) -> Result<DataQueryResponse> {
+    pub async fn query_by_project_number(
+        &self,
+        project_number: Option<String>,
+    ) -> Result<DataQueryResponse> {
         let project_number = project_number.unwrap_or_else(|| "OPP.23110200272".to_string());
 
         let query_builder = JiandaoyunQueryBuilder::new(APP_ID, ENTRY_ID)
@@ -226,7 +231,7 @@ impl JiandaoyunApiClient {
                 FieldNames::PROJECT_NUMBER, // 项目编号
                 FieldNames::DESIGN_NUMBER,  // 深化设计编号
                 FieldNames::CUSTOMER_NAME,  // 客户名称
-                FieldNames::STATION_NAME    // 场站
+                FieldNames::STATION_NAME,   // 场站
             ])
             .add_filter_condition(FieldNames::PROJECT_NUMBER, &project_number);
 
@@ -237,17 +242,20 @@ impl JiandaoyunApiClient {
     ///
     /// # 参数
     /// * `station_name` - 场站名称
-    pub async fn query_equipment_by_station(&self, station_name: String) -> Result<DataQueryResponse> {
+    pub async fn query_equipment_by_station(
+        &self,
+        station_name: String,
+    ) -> Result<DataQueryResponse> {
         let query_builder = JiandaoyunQueryBuilder::new(APP_ID, ENTRY_ID)
             .add_fields(&[
-                FieldNames::EQUIPMENT_LIST,  // 深化清单(子表单类型)
-                FieldNames::EQUIPMENT_NAME,  // 设备名称
-                FieldNames::BRAND,           // 品牌
-                FieldNames::MODEL,           // 规格型号
-                FieldNames::TECH_PARAM,      // 技术参数
-                FieldNames::QUANTITY,        // 数量
-                FieldNames::UNIT,            // 单位
-                FieldNames::EXTERNAL_PARAM   // 技术参数(外部)
+                FieldNames::EQUIPMENT_LIST, // 深化清单(子表单类型)
+                FieldNames::EQUIPMENT_NAME, // 设备名称
+                FieldNames::BRAND,          // 品牌
+                FieldNames::MODEL,          // 规格型号
+                FieldNames::TECH_PARAM,     // 技术参数
+                FieldNames::QUANTITY,       // 数量
+                FieldNames::UNIT,           // 单位
+                FieldNames::EXTERNAL_PARAM, // 技术参数(外部)
             ])
             .add_filter_condition(FieldNames::STATION_NAME, &station_name);
 

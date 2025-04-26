@@ -1,97 +1,83 @@
 <div class="transfer-container">
-  <nz-transfer
-    [nzDataSource]="list"
-    [nzDisabled]="disabled"
-    [nzShowSearch]="showSearch"
-    [nzShowSelectAll]="true"
-    [nzRenderList]="[renderList, renderList]"
-    (nzSelectChange)="select($event)"
-    (nzChange)="change($event)"
-  >
-    <ng-template
-      #renderList
-      let-items
-      let-direction="direction"
-      let-stat="stat"
-      let-disabled="disabled"
-      let-onItemSelectAll="onItemSelectAll"
-      let-onItemSelect="onItemSelect"
-    >
-      <nz-table 
-        #t 
-        [nzData]="$asTransferItems(items)" 
-        nzSize="small" 
-        [nzFrontPagination]="true"
-        [nzShowPagination]="true"
-        [nzPaginationType]="'default'"
-        [nzPageSize]="10"
-        [nzTotal]="items.length"
-        [nzShowSizeChanger]="true"
-        [nzPageSizeOptions]="[5, 10, 20, 30]">
+  <nz-transfer [nzDataSource]="list" [nzDisabled]="disabled" [nzShowSearch]="showSearch" [nzShowSelectAll]="true"
+    [nzRenderList]="[renderList, renderList]" (nzSelectChange)="select($event)" (nzChange)="change($event)">
+    <ng-template #renderList let-items let-direction="direction" let-stat="stat" let-disabled="disabled"
+      let-onItemSelectAll="onItemSelectAll" let-onItemSelect="onItemSelect">
+      <nz-table #t [nzData]="$asTransferItems(items)" nzSize="small" [nzFrontPagination]="true"
+        [nzShowPagination]="true" [nzPageSize]="5" [nzTotal]="items.length" [nzShowSizeChanger]="false">
         <thead>
           <tr>
-            <th
-              nzWidth="40px"
-              [nzDisabled]="disabled"
-              [nzChecked]="stat.checkAll"
-              [nzIndeterminate]="stat.checkHalf"
-              (nzCheckedChange)="onItemSelectAll($event)"
-            ></th>
-            <th nzWidth="25%">设备名称</th>
-            @if (direction === 'left') {
-              <th nzWidth="15%">位号</th>
-            }
-            <th nzWidth="30%">描述</th>
-            <th nzWidth="10%">数量</th>
+            <th [nzDisabled]="disabled" [nzChecked]="stat.checkAll" [nzIndeterminate]="stat.checkHalf"
+              (nzCheckedChange)="onItemSelectAll($event)"></th>
+            <th>设备名称</th>
+            <th>位号 *</th>
+            <th>描述 *</th>
+            <th>数量 *</th>
             <th>操作</th>
           </tr>
         </thead>
         <tbody>
           @for (data of t.data; track data) {
-            <tr (click)="onItemSelect(data)">
-              <td
-                [nzChecked]="!!data.checked"
-                [nzDisabled]="disabled"
-                (nzCheckedChange)="onItemSelect(data)"
-              ></td>
-              <td>{{ data.title }}</td>
-              @if (direction === 'left') {
-                <td>
-                  <ng-container *ngIf="!data['isEditing']">
-                    <nz-tag>{{ data['tag'] }}</nz-tag>
-                  </ng-container>
-                  <ng-container *ngIf="data['isEditing']">
-                    <input nz-input [(ngModel)]="data['tag']" placeholder="输入位号" style="width: 100px;" />
-                  </ng-container>
-                </td>
-              }
-              <td>
-                <ng-container *ngIf="!data['isEditing']">
-                  {{ data['description'] }}
-                </ng-container>
-                <ng-container *ngIf="data['isEditing']">
-                  <input nz-input [(ngModel)]="data['description']" placeholder="输入描述" />
-                </ng-container>
-              </td>
-              <td>
-                <ng-container *ngIf="!data['isEditing']">
-                  {{ data['quantity'] || 1 }}
-                </ng-container>
-                <ng-container *ngIf="data['isEditing']">
-                  <nz-input-number [(ngModel)]="data['quantity']" [nzMin]="1" [nzStep]="1" [nzSize]="'small'"></nz-input-number>
-                </ng-container>
-              </td>
-              <td>
-                <ng-container *ngIf="!data['isEditing']">
-                  <a (click)="startEdit(data); $event.stopPropagation()">编辑</a>
-                </ng-container>
-                <ng-container *ngIf="data['isEditing']">
-                  <a (click)="saveEdit(data); $event.stopPropagation()">保存</a>
-                  <nz-divider nzType="vertical"></nz-divider>
-                  <a (click)="cancelEdit(data); $event.stopPropagation()">取消</a>
-                </ng-container>
-              </td>
-            </tr>
+          <tr>
+            <td nzWidth="40px" (click)="onItemSelect(data); $event.stopPropagation()" [nzChecked]="!!data.checked"
+              [nzDisabled]="disabled || data['disabled']" (nzCheckedChange)="onItemSelect(data)">
+            </td>
+            <td>{{ data['title'] }}</td>
+            <td>
+              <ng-container *ngIf="!data['isEditing']">
+                @if (data['tag']) {
+                <nz-tag>{{ data['tag'] }}</nz-tag>
+                } @else if (data.checked) {
+                <span class="empty-field">未设置</span>
+                } @else {
+                <span class="inactive-field">-</span>
+                }
+              </ng-container>
+              <ng-container *ngIf="data['isEditing']">
+                <input nz-input [(ngModel)]="data['tag']" [placeholder]="data['tagPlaceholder']"
+                  style="width: 100px;" />
+              </ng-container>
+            </td>
+            <td>
+              <ng-container *ngIf="!data['isEditing']">
+                @if (data['description']) {
+                {{ data['description'] }}
+                } @else if (data.checked) {
+                <span class="empty-field">未设置</span>
+                } @else {
+                <span class="inactive-field">-</span>
+                }
+              </ng-container>
+              <ng-container *ngIf="data['isEditing']">
+                <input nz-input [(ngModel)]="data['description']" placeholder="请输入设备描述" />
+              </ng-container>
+            </td>
+            <td>
+              <ng-container *ngIf="!data['isEditing']">
+                @if (data['quantity']) {
+                {{ data['quantity'] }}
+                } @else if (data.checked) {
+                <span class="empty-field">未设置</span>
+                } @else {
+                <span class="inactive-field">-</span>
+                }
+              </ng-container>
+              <ng-container *ngIf="data['isEditing']">
+                <nz-input-number [(ngModel)]="data['quantity']" [nzMin]="1" [nzStep]="1" [nzSize]="'small'"
+                  placeholder="数量"></nz-input-number>
+              </ng-container>
+            </td>
+            <td>
+              <ng-container *ngIf="!data['isEditing']">
+                <a (click)="startEdit(data); $event.stopPropagation()">编辑</a>
+              </ng-container>
+              <ng-container *ngIf="data['isEditing']">
+                <a (click)="saveEdit(data); $event.stopPropagation()">保存</a>
+                <nz-divider nzType="vertical"></nz-divider>
+                <a (click)="cancelEdit(data); $event.stopPropagation()">取消</a>
+              </ng-container>
+            </td>
+          </tr>
           }
         </tbody>
       </nz-table>

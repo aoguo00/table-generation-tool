@@ -23,19 +23,19 @@ registerLocaleData(zh);
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideZoneChangeDetection({ eventCoalescing: true }), 
-    provideRouter(routes), 
-    provideNzI18n(zh_CN), 
+    provideZoneChangeDetection({ eventCoalescing: true }),
+    provideRouter(routes),
+    provideNzI18n(zh_CN),
     importProvidersFrom(
-      FormsModule, 
+      FormsModule,
       NzInputModule,
       NzButtonModule,
       NzIconModule.forRoot(icons),
       NzTableModule,
       NzTabsModule,
       NzSpinModule
-    ), 
-    provideAnimationsAsync(), 
+    ),
+    provideAnimationsAsync(),
     provideHttpClient()
   ]
 };

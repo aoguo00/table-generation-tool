@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
 
-// 项目信息接口
-interface ProjectInfo {
+/**
+ * 项目信息接口
+ */
+export interface ProjectInfo {
   id: string;
   project_name: string;
   project_number: string;
@@ -11,8 +13,10 @@ interface ProjectInfo {
   checked?: boolean;
 }
 
-// 设备信息接口
-interface EquipmentItem {
+/**
+ * 设备信息接口
+ */
+export interface EquipmentItem {
   id: string;
   name: string;
   brand: string;
@@ -23,11 +27,14 @@ interface EquipmentItem {
   external_param: string;
 }
 
-// 设备表项目接口
-interface DeviceItem {
+/**
+ * 设备表项目接口
+ */
+export interface DeviceItem {
   id: number;
   name: string;
   tagNumber: string;
+  description: string; // 描述
   quantity: number;
   isEditing?: boolean;
 }
@@ -51,7 +58,9 @@ export class SharedDataService {
   // 场站号
   private stationNumber: string = '';
 
-  constructor() { }
+  constructor() {
+    // 初始化共享数据服务
+  }
 
   /**
    * 设置项目数据

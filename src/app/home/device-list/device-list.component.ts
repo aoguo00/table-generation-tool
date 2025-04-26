@@ -47,24 +47,24 @@ export class DeviceListComponent implements OnInit {
   isLoading = false;
   // 表格滚动配置
   scrollConfig = { x: '1200px', y: '400px' };
-  
+
   // 注入的服务
   private modalRef = inject(NzModalRef);
   private message = inject(NzMessageService);
-  
+
   constructor() {
     // 从modalData中获取场站名称
-    const modalData = this.modalRef.getConfig().nzData as {stationName: string};
+    const modalData = this.modalRef.getConfig().nzData as { stationName: string };
     if (modalData && modalData.stationName) {
       this.stationName = modalData.stationName;
     }
   }
-  
+
   ngOnInit(): void {
     // 加载设备数据
     this.loadEquipmentData();
   }
-  
+
   /**
    * 加载设备数据
    */
@@ -73,17 +73,17 @@ export class DeviceListComponent implements OnInit {
       this.message.warning('未指定场站名称');
       return;
     }
-    
+
     this.isLoading = true;
-    
+
     try {
       // 如果是Tauri应用，则调用后端接口获取数据
       try {
         const { invoke } = await import('@tauri-apps/api/core');
-        const response = await invoke('query_equipment_by_station', { 
-          stationName: this.stationName 
+        const response = await invoke('query_equipment_by_station', {
+          stationName: this.stationName
         });
-        
+
         if (response && (response as any).equipment_list) {
           this.equipmentData = (response as any).equipment_list;
         } else {
@@ -92,7 +92,7 @@ export class DeviceListComponent implements OnInit {
       } catch (e) {
         // 如果不是Tauri应用或调用失败，则使用模拟数据
         console.error('调用Tauri API失败:', e);
-        
+
         // 模拟数据
         setTimeout(() => {
           this.equipmentData = [
@@ -106,7 +106,7 @@ export class DeviceListComponent implements OnInit {
       this.isLoading = false;
     }
   }
-  
+
   /**
    * 关闭弹窗
    */

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NzTableModule } from 'ng-zorro-antd/table';
@@ -15,16 +15,8 @@ import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzTransferModule, TransferChange, TransferItem, TransferSelectChange } from 'ng-zorro-antd/transfer';
 import { SelectDeviceComponent } from './select-device/select-device.component';
 
-/**
- * 设备项接口
- */
-interface DeviceItem {
-  id: number;
-  name: string;      // 设备名称
-  tagNumber: string; // 位号
-  quantity: number;  // 数量
-  isEditing?: boolean; // 是否处于编辑状态
-}
+// 导入共享服务中的设备项接口
+import { DeviceItem } from '../shared-data.service';
 
 /**
  * 设备表组件
@@ -56,9 +48,10 @@ export class DeviceTableComponent implements OnInit {
   deviceData: DeviceItem[] = [];
   // 加载状态
   isLoading = false;
-  // Tauri应用标志
-  isTauriApp = false;
-  
+
+  // 引用穿梭框组件
+  @ViewChild(SelectDeviceComponent) selectDeviceComponent!: SelectDeviceComponent;
+
   constructor(
     private message: NzMessageService,
     private router: Router,
@@ -66,33 +59,8 @@ export class DeviceTableComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    // 检查是否在Tauri环境中
-    this.checkTauriEnvironment();
-    
-    // 先打印共享服务中的数据，方便调试
-    console.log('初始化设备表组件, 共享服务数据：', {
-      selectedProject: this.sharedDataService.getSelectedProject(),
-      equipmentData: this.sharedDataService.getEquipmentData(),
-      deviceTableData: this.sharedDataService.getDeviceTableData(),
-      stationNumber: this.sharedDataService.getStationNumber()
-    });
-    
     // 初始化加载数据
     this.loadDeviceData();
-  }
-
-  /**
-   * 检查是否在Tauri环境中运行
-   */
-  async checkTauriEnvironment(): Promise<void> {
-    try {
-      const { getVersion } = await import('@tauri-apps/api/app');
-      await getVersion();
-      this.isTauriApp = true;
-    } catch (error) {
-      this.isTauriApp = false;
-      console.log('Running in web environment');
-    }
   }
 
   /**
@@ -100,7 +68,7 @@ export class DeviceTableComponent implements OnInit {
    */
   loadDeviceData(): void {
     this.isLoading = true;
-    
+
     // 从共享服务获取设备表数据
     const savedTableData = this.sharedDataService.getDeviceTableData();
     if (savedTableData && savedTableData.length > 0) {
@@ -108,38 +76,29 @@ export class DeviceTableComponent implements OnInit {
       this.isLoading = false;
       return;
     }
-    
+
     // 如果没有设备表数据，尝试从设备清单中转换
     const equipmentData = this.sharedDataService.getEquipmentData();
     if (equipmentData && equipmentData.length > 0) {
-      console.log('从设备清单中加载数据', equipmentData);
       // 转换格式
       this.deviceData = equipmentData.map((item, index) => ({
         id: index + 1,
         name: item.name,
         tagNumber: `TAG-${item.id}`, // 默认位号
+        description: item.tech_param || '', // 使用技术参数作为描述
         quantity: item.quantity
       }));
-      
+
       // 保存到共享服务
       this.sharedDataService.setDeviceTableData([...this.deviceData]);
       this.isLoading = false;
       return;
     }
-    
-    // 如果没有保存的数据，则加载模拟数据
-    setTimeout(() => {
-      this.deviceData = [
-        { id: 1, name: '阀门', tagNumber: 'INV-001', quantity: 10 },
-        { id: 2, name: '流量计', tagNumber: 'DCB-001', quantity: 20 },
-        { id: 3, name: '压缩机', tagNumber: 'PV-001', quantity: 500 },
-        { id: 4, name: '可燃气体探测器', tagNumber: 'BOX-001', quantity: 1 },
-        { id: 5, name: '干燥器', tagNumber: 'SUB-001', quantity: 1 }
-      ];
-      // 保存到共享服务
-      this.sharedDataService.setDeviceTableData([...this.deviceData]);
-      this.isLoading = false;
-    }, 100);
+
+    // 如果没有保存的数据和设备清单数据，则不加载模拟数据
+    // 用户需要通过穿梭框或手动添加来创建设备列表
+    this.deviceData = [];
+    this.isLoading = false;
   }
 
   /**
@@ -180,12 +139,18 @@ export class DeviceTableComponent implements OnInit {
 
     // 退出编辑状态
     data.isEditing = false;
-    
+
     // 触发变更检测
     this.deviceData = [...this.deviceData];
-    
+
     // 更新保存的数据
     this.sharedDataService.setDeviceTableData([...this.deviceData]);
+
+    // 同步更新穿梭框数据
+    if (this.selectDeviceComponent) {
+      this.selectDeviceComponent.updateTransferData(this.deviceData);
+    }
+
     this.message.success('保存成功');
   }
 
@@ -204,7 +169,7 @@ export class DeviceTableComponent implements OnInit {
     } else {
       // 如果是编辑现有行，则只退出编辑状态，不删除数据
       data.isEditing = false;
-      
+
       // 恢复原始数据（从服务中获取）
       const savedData = this.sharedDataService.getDeviceTableData();
       const originalItem = savedData.find(item => item.id === data.id);
@@ -212,14 +177,20 @@ export class DeviceTableComponent implements OnInit {
         // 恢复原始数据
         data.name = originalItem.name;
         data.tagNumber = originalItem.tagNumber;
+        data.description = originalItem.description;
         data.quantity = originalItem.quantity;
       }
-      
+
       this.message.info('已取消编辑');
     }
-    
+
     // 更新保存的数据
     this.sharedDataService.setDeviceTableData([...this.deviceData]);
+
+    // 同步更新穿梭框数据
+    if (this.selectDeviceComponent) {
+      this.selectDeviceComponent.updateTransferData(this.deviceData);
+    }
   }
 
   /**
@@ -233,6 +204,12 @@ export class DeviceTableComponent implements OnInit {
     this.deviceData = [...this.deviceData];
     // 更新保存的数据
     this.sharedDataService.setDeviceTableData([...this.deviceData]);
+
+    // 同步更新穿梭框数据
+    if (this.selectDeviceComponent) {
+      this.selectDeviceComponent.updateTransferData(this.deviceData);
+    }
+
     this.message.success('设备已删除');
   }
 
@@ -245,18 +222,22 @@ export class DeviceTableComponent implements OnInit {
       id: -this.deviceData.length - 1, // 临时ID为负数
       name: '',
       tagNumber: '',
+      description: '', // 初始化描述字段
       quantity: 1,
       isEditing: true
     };
-    
+
     // 添加到列表开头
     this.deviceData = [newDevice, ...this.deviceData];
     // 更新保存的数据
     this.sharedDataService.setDeviceTableData([...this.deviceData]);
+
+    this.message.info('请完成设备信息填写');
   }
 
   /**
    * 保存所有设备数据
+   * 收集表格中的设备数据并准备发送到后端
    */
   saveAllDevices(): void {
     // 检查是否有正在编辑的项
@@ -266,22 +247,36 @@ export class DeviceTableComponent implements OnInit {
       return;
     }
 
-    // 更新保存的数据
+    // 更新保存的数据到共享服务(仅前端状态管理)
     this.sharedDataService.setDeviceTableData([...this.deviceData]);
-    
-    // 这里可以发送数据到后端保存
+
+    // 准备要发送到后端的数据
+    // 这里我们可以对数据进行转换，以匹配后端API的需求
+    const tableData = this.deviceData.map((item, index) => ({
+      id: item.id,
+      name: item.name,
+      tagNumber: item.tagNumber,
+      description: item.description,
+      quantity: item.quantity,
+      order: index + 1  // 添加序号，表示在表格中的位置
+    }));
+
+    // 未来可能使用Tauri API发送数据到后端
+
     this.message.success('设备清单已保存');
-    console.log('设备数据：', this.deviceData);
+
+    // 打印收集到的表格数据，方便调试
+    console.error('准备发送到后端的表格数据：', tableData);
   }
 
   /**
-   * 生成点表 - 严格按照home.component.ts中的实现
+   * 生成点表 
    */
   async generatePointTable() {
     if (!this.validateBeforeGeneration()) {
       return;
     }
-    
+
     this.isLoading = true;
     try {
       // 加载Tauri API
@@ -291,7 +286,8 @@ export class DeviceTableComponent implements OnInit {
       // 准备数据和生成点表
       const equipmentItems = this.prepareEquipmentData();
       const filePath = await this.callGeneratePointTable(invoke, getCurrentWindow, equipmentItems);
-      
+      console.log('生成的IO点表路径:', filePath);
+
       // 处理生成结果
       await this.handleGeneratedFile(invoke, filePath);
     } catch (error) {
@@ -312,12 +308,7 @@ export class DeviceTableComponent implements OnInit {
       this.message.warning('请先选择一个项目');
       return false;
     }
-    
-    if (!this.isTauriApp) {
-      this.message.warning('此功能仅在桌面应用中可用');
-      return false;
-    }
-    
+
     return true;
   }
 
@@ -328,13 +319,13 @@ export class DeviceTableComponent implements OnInit {
   private prepareEquipmentData() {
     const selectedProject = this.sharedDataService.getSelectedProject();
     const equipmentData = this.sharedDataService.getEquipmentData();
-    
+
     if (!equipmentData || equipmentData.length === 0) {
       console.warn('原始设备数据为空，可能导致生成的点表没有数据');
     }
-    
+
     console.log('准备生成点表的数据源:', equipmentData);
-    
+
     return equipmentData.map(item => ({
       ...item,
       station_name: selectedProject!.station_name
@@ -352,19 +343,19 @@ export class DeviceTableComponent implements OnInit {
     // 获取当前窗口
     const currentWindow = await getCurrentWindow();
     const selectedProject = this.sharedDataService.getSelectedProject();
-    
+
     // 调用后端生成IO点表，严格按照原来的参数格式
     console.log('发送到后端的参数:', {
       equipmentData: equipmentItems,
       stationName: selectedProject!.station_name
     });
-    
+
     const filePath: string = await invoke('generate_io_point_table', {
       equipmentData: equipmentItems,
       stationName: selectedProject!.station_name,
       window: currentWindow
     });
-    
+
     console.log('生成的IO点表路径:', filePath);
     return filePath;
   }
@@ -386,25 +377,26 @@ export class DeviceTableComponent implements OnInit {
    */
   handleRightItemsChange(rightItems: any[]): void {
     console.log('穿梭框右侧数据变化:', rightItems);
-    
+
     // 将穿梭框数据转换为DeviceItem格式
     const newDevices: DeviceItem[] = rightItems.map((item, index) => ({
       id: parseInt(item.key) + 1000, // 使用一个不同的ID范围，避免冲突
       name: item.title,
       tagNumber: item.tag || '',
+      description: item.description || '', // 确保描述字段有值
       quantity: item.quantity || 1,
       isEditing: false
     }));
-    
+
     // 只保留新设备列表中的设备和手动添加的设备（ID为负数的）
     this.deviceData = [
       ...this.deviceData.filter(item => item.id < 0), // 保留手动添加的设备
       ...newDevices // 添加从穿梭框来的设备
     ];
-    
+
     // 保存到共享服务
     this.sharedDataService.setDeviceTableData([...this.deviceData]);
-    
+
     // 触发变更检测（防止视图不更新）
     setTimeout(() => {
       this.deviceData = [...this.deviceData];
