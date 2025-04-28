@@ -13,39 +13,12 @@ import { NzIconService } from 'ng-zorro-antd/icon';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzMessageModule } from 'ng-zorro-antd/message';
 import { StationListComponent } from './station-list/station-list.component';
-import { SharedDataService } from '../shared-data.service';
-
-// 项目信息接口
-interface ProjectInfo {
-  id: string;
-  project_name: string;
-  project_number: string;
-  design_number: string;
-  customer_name: string;
-  station_name: string;
-}
-
-// 项目查询响应
-interface ProjectQueryResponse {
-  projects: ProjectInfo[];
-}
-
-// 设备信息接口
-interface EquipmentItem {
-  id: string;
-  name: string;
-  brand: string;
-  model: string;
-  tech_param: string;
-  quantity: number;
-  unit: string;
-  external_param: string;
-}
-
-// 设备查询响应
-interface EquipmentQueryResponse {
-  equipment_list: EquipmentItem[];
-}
+import { ProjectStateService } from '../services/project-state.service';
+import { EquipmentStateService } from '../services/equipment-state.service';
+import { ApiService } from '../services/api.service';
+import { ProjectInfo } from '../models/project.model';
+import { EquipmentItem } from '../models/equipment.model';
+import { finalize } from 'rxjs';
 
 /**
  * 主页组件
@@ -70,15 +43,6 @@ interface EquipmentQueryResponse {
   styleUrls: ['./home.component.scss']
 })
 export class HomeComponent implements OnInit {
-  constructor(
-    private iconService: NzIconService,
-    private message: NzMessageService,
-    private router: Router,
-    private sharedDataService: SharedDataService
-  ) {
-    this.iconService.addIcon(SearchOutline);
-  }
-
   title = 'table-generation-tool';
   projectData: ProjectInfo[] = [];
   selectedProject: ProjectInfo | null = null;
@@ -87,8 +51,19 @@ export class HomeComponent implements OnInit {
   stationNumber: string = '';
   isStationValid: boolean = false;
 
-  async ngOnInit() {
-    // 从共享服务中恢复数据
+  constructor(
+    private iconService: NzIconService,
+    private message: NzMessageService,
+    private router: Router,
+    private projectStateService: ProjectStateService,
+    private equipmentStateService: EquipmentStateService,
+    private apiService: ApiService
+  ) {
+    this.iconService.addIcon(SearchOutline);
+  }
+
+  ngOnInit() {
+    // 从状态服务中恢复数据
     this.loadSavedData();
 
     // 初始化验证状态
@@ -96,111 +71,106 @@ export class HomeComponent implements OnInit {
   }
 
   /**
-   * 从共享服务中加载已保存的数据
+   * 从状态服务中加载已保存的数据
    */
   loadSavedData(): void {
-    const savedProject = this.sharedDataService.getSelectedProject();
-    const savedProjectData = this.sharedDataService.getProjectData();
-    const savedEquipmentData = this.sharedDataService.getEquipmentData();
-    const savedStationNumber = this.sharedDataService.getStationNumber();
-
-    if (savedProject) {
-      this.selectedProject = savedProject;
-    }
-
-    if (savedProjectData && savedProjectData.length > 0) {
-      this.projectData = savedProjectData;
-    }
-
-    if (savedEquipmentData && savedEquipmentData.length > 0) {
-      this.equipmentData = savedEquipmentData;
-    }
-
-    if (savedStationNumber) {
-      this.stationNumber = savedStationNumber;
-    }
+    this.selectedProject = this.projectStateService.getSelectedProject();
+    this.projectData = this.projectStateService.getProjectData();
+    this.equipmentData = this.equipmentStateService.getEquipmentData();
+    this.stationNumber = this.projectStateService.getStationNumber();
   }
 
-  async queryProject(projectNumber?: string) {
+  /**
+   * 查询项目
+   * @param projectNumber 项目编号
+   */
+  queryProject(projectNumber?: string) {
     if (!projectNumber) {
       this.message.warning('请输入项目编号');
       return;
     }
 
     this.isLoading = true;
-    try {
-      const { invoke } = await import('@tauri-apps/api/core');
-      const response: ProjectQueryResponse = await invoke('query_jdy_data_by_project_number', {
-        projectNumber: projectNumber
+    this.apiService.queryProjectByNumber(projectNumber)
+      .pipe(finalize(() => this.isLoading = false))
+      .subscribe({
+        next: (response) => {
+          this.projectData = response.projects || [];
+          this.equipmentData = [];
+          this.selectedProject = null;
+
+          // 保存到状态服务
+          this.projectStateService.setProjectData(this.projectData);
+          this.projectStateService.setSelectedProject(null);
+          this.equipmentStateService.setEquipmentData([]);
+
+          console.log('获取到的项目数据:', response);
+        },
+        error: (error) => {
+          console.error('调用API失败:', error);
+          this.message.error('查询失败: ' + error);
+        }
       });
-
-      this.projectData = response.projects || [];
-      this.equipmentData = [];
-      this.selectedProject = null;
-
-      // 保存到共享服务
-      this.sharedDataService.setProjectData(this.projectData);
-      this.sharedDataService.setSelectedProject(null);
-      this.sharedDataService.setEquipmentData([]);
-
-      console.log('获取到的项目数据:', response);
-    } catch (error) {
-      console.error('调用API失败:', error);
-      this.message.error('查询失败: ' + error);
-    } finally {
-      this.isLoading = false;
-    }
   }
 
+  /**
+   * 清空表单
+   */
   clearForm() {
     this.projectData = [];
     this.equipmentData = [];
     this.selectedProject = null;
     this.stationNumber = '';
 
-    // 清空共享服务中的数据
-    this.sharedDataService.clearAll();
+    // 清空状态服务中的数据
+    this.projectStateService.clearAll();
+    this.equipmentStateService.clearAll();
   }
 
   /**
    * 选择项目并加载设备清单
    * @param project 选中的项目
    */
-  async selectProject(project: ProjectInfo) {
+  selectProject(project: ProjectInfo) {
     this.selectedProject = project;
-    // 保存到共享服务
-    this.sharedDataService.setSelectedProject(project);
-    await this.loadEquipmentData(project.station_name);
+    // 保存到状态服务
+    this.projectStateService.setSelectedProject(project);
+    this.loadEquipmentData(project.station_name);
   }
 
-  async loadEquipmentData(stationName: string) {
+  /**
+   * 加载设备数据
+   * @param stationName 场站名称
+   */
+  loadEquipmentData(stationName: string) {
     this.isLoading = true;
     this.equipmentData = [];
 
-    try {
-      const { invoke } = await import('@tauri-apps/api/core');
-      const response: EquipmentQueryResponse = await invoke('query_equipment_by_station', {
-        stationName: stationName
+    this.apiService.queryEquipmentByStation(stationName)
+      .pipe(finalize(() => this.isLoading = false))
+      .subscribe({
+        next: (response) => {
+          this.equipmentData = response.equipment_list || [];
+
+          // 保存到状态服务
+          this.equipmentStateService.setEquipmentData(this.equipmentData);
+
+          console.log('获取到的设备数据:', response);
+        },
+        error: (error) => {
+          console.error('查询设备清单失败:', error);
+          this.message.error('查询设备清单失败: ' + error);
+        }
       });
-
-      this.equipmentData = response.equipment_list || [];
-
-      // 保存到共享服务
-      this.sharedDataService.setEquipmentData(this.equipmentData);
-
-      console.log('获取到的设备数据:', response);
-    } catch (error) {
-      console.error('查询设备清单失败:', error);
-      this.message.error('查询设备清单失败: ' + error);
-    } finally {
-      this.isLoading = false;
-    }
   }
 
+  /**
+   * 验证场站号
+   */
   validateStation() {
     this.isStationValid = this.stationNumber.trim() !== '';
-    // 保存场站号到共享服务
-    this.sharedDataService.setStationNumber(this.stationNumber);
+    // 保存场站号到状态服务
+    this.projectStateService.setStationNumber(this.stationNumber);
   }
 
   /**
@@ -218,11 +188,11 @@ export class HomeComponent implements OnInit {
       return;
     }
 
-    // 保存当前状态到共享服务
-    this.sharedDataService.setProjectData(this.projectData);
-    this.sharedDataService.setSelectedProject(this.selectedProject);
-    this.sharedDataService.setEquipmentData(this.equipmentData);
-    this.sharedDataService.setStationNumber(this.stationNumber);
+    // 保存当前状态到状态服务
+    this.projectStateService.setProjectData(this.projectData);
+    this.projectStateService.setSelectedProject(this.selectedProject);
+    this.equipmentStateService.setEquipmentData(this.equipmentData);
+    this.projectStateService.setStationNumber(this.stationNumber);
 
     // 跳转到设备表页面
     this.router.navigate(['/device-table']);
